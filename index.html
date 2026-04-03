@@ -76,6 +76,47 @@
 }
 
 
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+
+.plantilla-table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+
+.plantilla-table th, .plantilla-table td {
+    border-bottom: 1px solid #ccc;
+    padding: 6px;
+    text-align: left;
+}
+
+
+.plantilla-table input {
+    width: 90%;
+    padding: 4px;
+}
+
+
     </style>
 </head>
 <body>
@@ -109,6 +150,8 @@
         <input type="text" id="newTeamName" placeholder="Nombre del equipo">
         <input type="text" id="playerList" placeholder="Lista: 4 LUCIA, 7 MARIA...">
         <button class="btn btn-save" onclick="guardarPlantilla()">💾 Guardar Equipo</button>
+<button class="btn" onclick="abrirModalPlantilla('crear')">➕ Crear plantilla</button>
+<button class="btn" onclick="abrirModalPlantilla('editar', document.getElementById('teamSelect').value)">✏️ Modificar plantilla</button>
     </div>
 
 
@@ -192,6 +235,35 @@
 </div>
 
 
+<!-- MODAL PARA CREAR / EDITAR PLANTILLAS -->
+<div id="modalPlantilla" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2 id="modalTitulo"></h2>
+
+
+        <table id="tablaPlantilla" class="plantilla-table">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="plantillaBody"></tbody>
+        </table>
+
+
+        <button class="btn" onclick="agregarFilaPlantilla()">➕ Añadir jugadora</button>
+
+
+        <div style="margin-top:15px;">
+            <button class="btn btn-save" onclick="guardarPlantillaModal()">💾 Guardar</button>
+            <button class="btn" style="background:#777;" onclick="cerrarModalPlantilla()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+
 
 
 <script>
@@ -246,6 +318,128 @@
         contar();
     }
     
+let modoModal = ""; 
+let equipoEditando = ""; 
+let plantillaTemporal = []; 
+
+
+function abrirModalPlantilla(modo, equipo = "") {
+    modoModal = modo;
+    equipoEditando = equipo;
+
+
+    const modal = document.getElementById("modalPlantilla");
+    const titulo = document.getElementById("modalTitulo");
+    const tbody = document.getElementById("plantillaBody");
+
+
+    tbody.innerHTML = "";
+
+
+    if (modo === "crear") {
+        titulo.innerText = "Crear nueva plantilla";
+        plantillaTemporal = [];
+        agregarFilaPlantilla(); // primera fila vacía
+    } 
+    else if (modo === "editar") {
+        titulo.innerText = `Editar plantilla: ${equipo}`;
+        plantillaTemporal = [...teamDB[equipo]];
+
+
+        plantillaTemporal.forEach(j => {
+            agregarFilaPlantilla(j.numero, j.nombre);
+        });
+    }
+
+
+    modal.style.display = "flex";
+}
+
+
+function cerrarModalPlantilla() {
+    document.getElementById("modalPlantilla").style.display = "none";
+}
+
+
+function agregarFilaPlantilla(numero = "", nombre = "") {
+    const tbody = document.getElementById("plantillaBody");
+
+
+    const fila = document.createElement("tr");
+
+
+    fila.innerHTML = `
+        <td><input type="text" class="numInput" value="${numero}" maxlength="2"></td>
+        <td><input type="text" class="nameInput" value="${nombre}"></td>
+        <td><button onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
+    `;
+
+
+    tbody.appendChild(fila);
+}
+
+
+function guardarPlantillaModal() {
+
+
+console.log("➡ guardarPlantillaModal() llamada");
+    // resto del código…
+
+
+    const filas = document.querySelectorAll("#plantillaBody tr");
+    let nuevaPlantilla = [];
+
+
+    for (let f of filas) {
+        const numero = f.querySelector(".numInput").value.trim();
+        const nombre = f.querySelector(".nameInput").value.trim();
+
+
+        if (!numero || !nombre) {
+            alert("Todos los campos deben estar completos.");
+            return;
+        }
+
+
+        if (!/^\d{2}$/.test(numero)) {
+            alert("El dorsal debe tener dos dígitos (00–99).");
+            return;
+        }
+
+
+        nuevaPlantilla.push({ numero, nombre });
+    }
+
+
+    // Validar dorsales duplicados
+    const dorsales = nuevaPlantilla.map(j => j.numero);
+    if (new Set(dorsales).size !== dorsales.length) {
+        alert("No puede haber dorsales duplicados.");
+        return;
+    }
+
+
+    if (modoModal === "crear") {
+        const nombreEquipo = prompt("Nombre del nuevo equipo:");
+        if (!nombreEquipo) return;
+
+
+        teamDB[nombreEquipo] = nuevaPlantilla;
+    } 
+    else if (modoModal === "editar") {
+        teamDB[equipoEditando] = nuevaPlantilla;
+    }
+
+
+    localStorage.setItem("teamDB", JSON.stringify(teamDB));
+    cargarEquiposEnSelector();
+
+
+    cerrarModalPlantilla();
+    alert("Plantilla guardada correctamente.");
+}
+
+
     // ... (El resto de funciones toggleConv() y contar() sin cambios) ...
 
 
