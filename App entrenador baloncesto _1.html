@@ -1,0 +1,953 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach App: Penya Roja (Pro)</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 10px; background: #eef2f7; padding-bottom: 100px; }
+        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        .header { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; gap: 10px; }
+        .header h2 { color: #0d47a1; margin: 0; }
+        /* Estilo para el logo SVG */
+        .logo-main { width: 45px; height: auto; fill: #1b5e20; } 
+        .section { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; }
+        .btn { background: #1976d2; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-save { background: #2e7d32; margin-top: 5px; }
+        .player-header { display: grid; grid-template-columns: 1fr 55px 55px 75px; gap: 5px; align-items: center; padding: 8px; background: #0d47a1; color: white; border-radius: 6px 6px 0 0; font-size: 10px; font-weight: bold; text-align: center; }
+        .player-item { display: grid; grid-template-columns: 1fr 55px 55px 75px; gap: 5px; align-items: center; padding: 8px; border-bottom: 1px solid #eee; background: white; }
+        .player-item span { text-align: left; padding-left: 5px; font-size: 14px; }
+        .table-container { overflow-x: auto; margin-top: 20px; }
+
+
+/* Columna de jugadoras */
+#resultado table td:first-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+}
+
+
+/* Columna Tot */
+#resultado table td:last-child,
+#resultado table th:last-child {
+    width: 35px;
+    max-width: 35px;
+    white-space: nowrap;
+}
+
+
+/* Opcional: tabla más compacta */
+#resultado table th,
+#resultado table td {
+    padding: 4px;
+}
+
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #cfd8dc; padding: 8px; text-align: center; }
+        th { background: #0d47a1; color: white; cursor: pointer; }
+        .juega { background: #c8e6c9 !important; font-weight: bold; color: #1b5e20; }
+        .status-bar { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 10px; background: #fff; border-radius: 0 0 6px 6px; border: 1px solid #eee; border-top: none; }
+         .button-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+        .count-ok { color: #2e7d32; }
+        .count-error { color: #c62828; text-decoration: underline; }
+        #focusCard { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: #0d47a1; color: white; padding: 15px; border-radius: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); z-index: 1000; text-align: center; }
+        #focusCard h3 { margin: 0 0 5px 0; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;}
+        #focusCard ul { list-style: none; padding: 0; margin: 10px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+        #focusCard li { background: rgba(255,255,255,0.2); padding: 8px; border-radius: 6px; font-weight: bold; }
+        .highlight-col { background: #fff9c4 !important; border: 2px solid #fbc02d !important; }
+        input:disabled { opacity: 0.2; }
+
+
+/* Celda donde NO puede jugar por lesión */
+.prohibido {
+    background-color: #ffb3b3 !important;
+    color: #900;
+    font-weight: bold;
+}
+
+
+    </style>
+</head>
+<body>
+
+
+<div id="header" style="
+    text-align:center;
+    padding:20px 0;
+    margin-bottom:20px;
+">
+    <img src="photo.jpg" alt="Logo Penya Roja" 
+         style="height:120px; margin-bottom:10px;">
+    <h1 style="
+        margin:0;
+        font-size:28px;
+        color:#0d47a1;
+        font-weight:900;
+    ">
+        Coach App: Penya Roja
+    </h1>
+</div>
+
+
+
+
+<div class="container">
+    
+    <div class="section">
+        <label>1. Equipo / Plantilla:</label>
+        <select id="teamSelect" onchange="cargarPlantilla()"></select>
+        <input type="text" id="newTeamName" placeholder="Nombre del equipo">
+        <input type="text" id="playerList" placeholder="Lista: 4 LUCIA, 7 MARIA...">
+        <button class="btn btn-save" onclick="guardarPlantilla()">💾 Guardar Equipo</button>
+    </div>
+
+
+    <div id="selectorZona" style="display:none;" class="section">
+        <label>2. Configurar Partido:</label>
+
+
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="rivalName" placeholder="Nombre del Rival">
+            <input type="date" id="matchDate">
+        </div>
+
+
+        <div class="player-header">
+            <span>JUGADORA</span>
+            <span>¿VIENE?</span>
+            <span>TITULAR</span>
+            <span>LESIONADA</span>
+        </div>
+
+
+        <div id="checkboxes"></div>
+
+
+        <div class="status-bar">
+            <span id="contJ">Conv: 0</span>
+            <span id="contT">Titulares: 0/5</span>
+        </div>
+
+
+        <div class="button-grid">
+            <button class="btn" onclick="generarPlan()">⚡ Generar Rotación</button>
+            <button class="btn" style="background-color: #757575;" onclick="reiniciarConfiguracion()">🔄 Reset</button>
+            <button class="btn btn-save" onclick="validarPlan()">🔍 Validar Plan</button>
+            <button class="btn btn-save" style="background:#8e24aa;" onclick="reajustarPlan()">♻ Reajustar Automáticamente</button>
+        </div>
+
+
+        <div id="resultado" class="table-container"></div>
+    </div> <!-- ESTE CIERRE ES EL QUE FALTABA -->
+
+
+    <div class="section">
+        <label>3. Historial de Partidos:</label>
+        <input type="text" id="opponentName" placeholder="Nombre rival (ej: CB Benicalap)">
+        <input type="date" id="historyDate">
+        <button class="btn btn-save" onclick="guardarPartido()">💾 Guardar Plan de Partido</button>
+        <select id="historySelect" onchange="cargarPartidoGuardado()">
+            <option value="">-- Cargar Partido Histórico --</option>
+        </select>
+<!-- ⭐ NUEVO BOTÓN DE BORRADO ⭐ -->
+    <button class="btn" style="background:#d32f2f; color:white; margin-top:10px;"
+        onclick="
+            const key = document.getElementById('historySelect').value;
+            if (key) borrarPartido(key);
+        ">
+        🗑️ Borrar partido seleccionado
+    </button>
+    </div>
+</div> <!-- Cierra el contenedor principal -->
+
+
+<!-- Ventana de Resumen Flotante -->
+<div id="focusCard" onclick="this.style.display='none'">
+    <h3>
+        <!-- Mini Logo Integrado -->
+        <svg style="width: 25px; height: auto; fill: white;" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" stroke="white" stroke-width="3" fill="none"/>
+    <path d="M50 30 C45 35, 40 40, 40 50 C40 60, 45 65, 50 70 
+             M50 30 C55 35, 60 40, 60 50 C60 60, 55 65, 50 70 
+             M45 45 Q50 42, 55 45 
+             M45 55 Q50 58, 55 55 
+             M48 62 L52 62 
+             M45 25 Q50 20, 55 25" 
+          stroke="white" stroke-width="2" fill="none"/>
+</svg>
+        Entran en Periodo 1
+    </h3>
+    <ul id="focusList"></ul>
+    <p style="font-size: 10px; opacity: 0.8;">(Toca para cerrar)</p>
+</div>
+
+
+
+
+<script>
+    let db = JSON.parse(localStorage.getItem('coach_teams')) || {};
+    let historyDB = JSON.parse(localStorage.getItem('match_history')) || {};
+    let globalPlan = [];
+
+
+    function actualizarDropdown() {
+        // ... (resto de la función actualizarDropdown() sin cambios) ...
+        const select = document.getElementById('teamSelect');
+        select.innerHTML = '<option value="">-- Cargar Equipo --</option>';
+        Object.keys(db).forEach(name => {
+            let opt = document.createElement('option');
+            opt.value = name; opt.innerText = name;
+            select.appendChild(opt);
+        });
+        // Llamada a la nueva función para llenar el historial al cargar la app
+        actualizarHistorialDropdown();
+    }
+
+
+    function guardarPlantilla() {
+        // ... (resto de la función guardarPlantilla() sin cambios) ...
+        const name = document.getElementById('newTeamName').value.trim();
+        const players = document.getElementById('playerList').value;
+        if(!name || !players) return alert("Error: Debes poner un nombre y al menos una jugadora.");
+        db[name] = players;
+        localStorage.setItem('coach_teams', JSON.stringify(db));
+        actualizarDropdown();
+    }
+
+
+    function cargarPlantilla() {
+        // ... (resto de la función cargarPlantilla() sin cambios) ...
+        const team = document.getElementById('teamSelect').value;
+        if(!team) return;
+        document.getElementById('newTeamName').value = team;
+        document.getElementById('playerList').value = db[team];
+        const nombres = db[team].split(',').map(s => s.trim()).filter(s => s !== "");
+        let html = '';
+        nombres.forEach((n, i) => {
+          html += `<div class="player-item">
+    <span>${n}</span>
+    <input type="checkbox" id="v${i}" checked onclick="toggleConv(${i})">
+    <input type="checkbox" id="t${i}" class="t-cb" onclick="contar()">
+    <input type="checkbox" id="l${i}" class="l-cb" onclick="marcarLesionada(${i})" title="Lesionada">
+</div>`;
+        });
+        document.getElementById('checkboxes').innerHTML = html;
+        document.getElementById('selectorZona').style.display = 'block';
+        contar();
+    }
+    
+    // ... (El resto de funciones toggleConv() y contar() sin cambios) ...
+
+
+    function toggleConv(i) {
+        const v = document.getElementById(`v${i}`);
+        const t = document.getElementById(`t${i}`);
+        if (!v.checked) { t.checked = false; t.disabled = true; } 
+        else { t.disabled = false; }
+        contar();
+    }
+
+
+function normalizarSiNo(resp) {
+    if (!resp) return null;
+    resp = resp.trim().toLowerCase();
+    if (resp === "sí" || resp === "si" || resp === "s" || resp === "1") return "si";
+    if (resp === "no" || resp === "n" || resp === "0") return "no";
+    return null;
+}
+
+
+function marcarLesionada(i) {
+    const viene = document.getElementById(`v${i}`);
+    const lesionada = document.getElementById(`l${i}`);
+
+
+    // Obtener nombre real de la jugadora
+    const nombres = document.getElementById('playerList').value.split(',').map(s => s.trim());
+    const nombre = nombres[i];
+
+
+    // Buscar jugadora en globalPlan (solo si viene)
+    let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
+
+
+    if (lesionada.checked) {
+
+
+        // Pregunta con Sí / No
+        let antes = prompt("¿La jugadora estaba lesionada ANTES del partido? (Sí / No)");
+        antes = antes?.toLowerCase();
+
+
+        if (antes === "sí" || antes === "si") {
+
+
+            // Estaba lesionada antes del partido
+            viene.checked = false;
+            contar();
+
+
+            if (j) {
+                j.lesionada = true;
+                j.lesionadaDesde = 0;   // No puede jugar ninguna parte
+            }
+
+
+        } else if (antes === "no") {
+
+
+            // Lesionada DURANTE el partido
+            preguntarParteLesion(i);
+
+
+        } else {
+
+
+            alert("Respuesta no válida. Escribe Sí o No.");
+            return;
+
+
+        }
+
+
+    } else {
+        // Si desmarcan lesionada → limpiar datos
+        if (j) {
+            j.lesionada = false;
+            j.lesionadaDesde = null;
+        }
+    }
+}
+
+
+function preguntarParteLesion(i) {
+    let parte = prompt("¿En qué parte se lesionó? (1 a 6)");
+    parte = parseInt(parte);
+
+
+    if (parte >= 1 && parte <= 6) {
+        const nombres = document.getElementById('playerList').value.split(',').map(s => s.trim());
+        const nombre = nombres[i];
+        let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
+
+
+        if (j) {
+            j.lesionada = true;
+            j.lesionadaDesde = parte - 1;
+
+
+            // LIMPIAR SIEMPRE las partes posteriores
+            for (let p = j.lesionadaDesde; p < 6; p++) {
+                j.plan[p] = '-';
+            }
+
+
+            j.jugados = j.plan.filter(v => v === 'X').length;
+        }
+
+
+        let auto = normalizarSiNo(
+            prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
+        );
+
+
+        if (auto === "si") {
+            reajustarPlan();
+        } else {
+            alert("Puedes ajustar manualmente las partes posteriores.");
+            render(globalPlan);
+        }
+
+
+    } else {
+        alert("Parte no válida.");
+    }
+}
+    function contar() {
+        const nJ = document.querySelectorAll('input[id^="v"]:checked').length;
+        const nT = document.querySelectorAll('.t-cb:checked').length;
+        const elJ = document.getElementById('contJ');
+        const elT = document.getElementById('contT');
+        elJ.innerText = `Conv: ${nJ}`;
+        elT.innerText = `Titulares: ${nT}/5`;
+        elJ.className = (nJ >= 5 && nJ <= 12) ? 'count-ok' : 'count-error';
+        elT.className = (nT === 5) ? 'count-ok' : 'count-error';
+    }
+
+
+    // --- NUEVAS FUNCIONES PARA HISTORIAL ---
+    function guardarPartido() {
+        const rival = document.getElementById('opponentName').value.trim();
+        const fecha = document.getElementById('historyDate').value;
+
+
+        if (!rival || !fecha || globalPlan.length === 0) {
+            return alert("Faltan datos (rival, fecha) o el plan de partido no está generado.");
+        }
+
+
+        const key = `${fecha} - ${rival}`;
+        historyDB[key] = globalPlan; // Guarda el plan completo como un objeto JSON
+        localStorage.setItem('match_history', JSON.stringify(historyDB)); // Guarda en localStorage
+        alert(`Plan de partido contra ${rival} guardado con éxito.`);
+        actualizarHistorialDropdown();
+    }
+
+
+    function actualizarHistorialDropdown() {
+        const select = document.getElementById('historySelect');
+        select.innerHTML = '<option value="">-- Cargar Partido Histórico --</option>';
+        // Ordena las claves por fecha (clave) de forma descendente
+        Object.keys(historyDB).sort().reverse().forEach(key => {
+            let opt = document.createElement('option');
+            opt.value = key; opt.innerText = key;
+            select.appendChild(opt);
+        });
+    }
+
+
+    function cargarPartidoGuardado() {
+        const key = document.getElementById('historySelect').value;
+        if (!key) return;
+        const planGuardado = historyDB[key];
+        if (planGuardado) {
+            render(planGuardado); // Renderiza el plan histórico en la tabla
+            alert(`Cargado partido: ${key}`);
+        }
+    }
+
+
+function borrarPartido(key) {
+    const confirmar = confirm(`¿Quieres borrar el partido "${key}"?`);
+    if (!confirmar) return;
+
+
+    delete historyDB[key]; // elimina el partido del objeto
+    localStorage.setItem('match_history', JSON.stringify(historyDB));
+
+
+    actualizarHistorialDropdown(); // refresca el selector
+    alert(`Partido "${key}" borrado correctamente.`);
+}
+
+
+
+
+   // Función mejorada para guardar y limpiar campos
+    function guardarPlan() {
+        if (typeof globalPlan === 'undefined' || globalPlan.length === 0) return alert("⚠️ Genera un plan primero.");
+        
+        const rival = document.getElementById('rivalName').value || "Rival";
+        const fecha = document.getElementById('matchDate').value || new Date().toLocaleDateString();
+        
+        const planesGuardados = JSON.parse(localStorage.getItem('misPlanes') || '[]');
+        planesGuardados.push({
+            id: Date.now(),
+            nombre: `Vs ${rival}`,
+            datos: globalPlan,
+            fecha: fecha
+        });
+
+
+        localStorage.setItem('misPlanes', JSON.stringify(planesGuardados));
+        alert("✅ Plan guardado.");
+
+
+        // RESET VALORES POR DEFECTO
+        document.getElementById('rivalName').value = ""; 
+        document.getElementById('matchDate').valueAsDate = new Date(); // Fecha actual
+    }
+
+
+    // Función para reiniciar el apartado 2
+    function reiniciarConfiguracion() {
+    document.getElementById('rivalName').value = "";
+    document.getElementById('matchDate').valueAsDate = new Date();
+
+
+    const inputs = document.getElementById('checkboxes').querySelectorAll('input[type="checkbox"]');
+    inputs.forEach(input => {
+        if (input.id.startsWith('v')) input.checked = true;
+        if (input.id.startsWith('t')) {
+            input.checked = false;
+            input.disabled = false;
+        }
+        if (input.id.startsWith('l')) {
+            input.checked = false; // limpiar LESIONADA
+        }
+    });
+
+
+    document.getElementById('resultado').innerHTML = "";
+    if (document.getElementById('focusCard')) document.getElementById('focusCard').style.display = 'none';
+
+
+    globalPlan = [];   // ← CLAVE
+
+
+    contar();
+    alert("🧹 Configuración reiniciada.");
+}
+    // Inicializar fecha al cargar
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateInput = document.getElementById('matchDate');
+        if(dateInput) dateInput.valueAsDate = new Date();
+    });
+
+
+
+
+    // --- FUNCIONES EXISTENTES (generarPlan, render, verPeriodo) ---
+    function generarPlan() {
+// Si ya existe un plan generado → avisar
+    if (globalPlan && globalPlan.length > 0) {
+        alert("Ya existe un plan generado.\n\n" +
+              "👉 Si quieres reajustarlo, pulsa 'Reajustar automáticamente'.\n" +
+              "👉 Si quieres empezar de cero, pulsa 'Reset'.");
+        return;
+    }
+        let players = [];
+        const nombres = document.getElementById('playerList').value.split(',').map(s => s.trim()).filter(s => s !== "");
+        nombres.forEach((n, i) => {
+            if(document.getElementById(`v${i}`).checked) {
+                players.push({
+    name: n,
+    titular: document.getElementById(`t${i}`).checked,
+    lesionada: document.getElementById(`l${i}`).checked,
+    plan: ['-', '-', '-', '-', '-', '-'],
+    jugados: 0,
+    racha: 0
+});
+            }
+        });
+
+
+        if(players.length < 5) return alert("⚠️ Error: Necesitas al menos 5 jugadoras.");
+        const nTitulares = players.filter(p => p.titular).length;
+        if(nTitulares !== 5) return alert("⚠️ Error: Marca exactamente 5 titulares.");
+
+
+        players.forEach(p => { 
+            if(p.titular) { p.plan[0] = 'X'; p.jugados = 1; p.racha = 0; } // Asigna el primer periodo aquí
+            else { p.racha = 1; } 
+        });
+
+
+        for(let i=1; i<6; i++) {
+            players.sort((a,b) => (a.jugados - b.jugados) || (b.racha - a.racha));
+            players.forEach((p, idx) => {
+                if(idx < 5) { p.plan[i] = 'X'; p.jugados++; p.racha = 0; }
+                else { p.plan[i] = '-'; p.racha++; }
+            });
+        }
+        globalPlan = players;
+        render(players);
+    }
+
+
+    function render(lista) {
+    lista.sort((a,b) => a.name.localeCompare(b.name));
+
+
+    let h = `<table><tr><th>Nombre</th>`;
+    for(let i=1; i<=6; i++) h += `<th onclick="verPeriodo(${i-1})">P${i}</th>`;
+    h += `<th>Tot</th></tr>`;
+
+
+    let totalesPeriodo = [0,0,0,0,0,0];
+
+
+    lista.forEach(p => {
+        let iconoLesion = "";
+        if (p.lesionada) {
+            let parte = p.lesionadaDesde + 1;
+            iconoLesion = ` <span title="Lesionada desde P${parte}">🩹</span>`;
+        }
+
+
+        h += `<tr><td style="text-align:left">${p.name}${iconoLesion}</td>`;
+
+
+        p.plan.forEach((per, idx) => {
+            let clase = "";
+
+
+            if (p.lesionada && idx >= p.lesionadaDesde) {
+                clase = "prohibido";
+            } else if (per === 'X') {
+                clase = "juega";
+                totalesPeriodo[idx]++;
+            }
+
+
+            h += `<td class="${clase} col-${idx}" onclick="toggleCelda('${p.name}', ${idx})">${per}</td>`;
+        });
+
+
+        h += `<td>${p.jugados}</td></tr>`;
+    });
+
+
+    // Fila de totales
+    h += `<tr style="background:#e3f2fd;"><th>Total</th>`;
+    for (let p = 0; p < 6; p++) {
+        const esOk = (totalesPeriodo[p] === 5);
+
+
+        if (esOk) {
+            h += `<th style="
+                color:#0a7f00;
+                background:#d7ffd9;
+                font-weight:bold;
+            ">${totalesPeriodo[p]}</th>`;
+        } else {
+            h += `<th style="
+                color:#b30000;
+                background:#ffe0e0;
+                font-weight:bold;
+            ">${totalesPeriodo[p]}</th>`;
+        }
+    }
+    h += `<th>-</th></tr>`;
+
+
+    document.getElementById('resultado').innerHTML = h + '</table>';
+}
+
+
+    function verPeriodo(idx) {
+        const enPista = globalPlan.filter(p => p.plan[idx] === 'X');
+        const listEl = document.getElementById('focusList');
+        const card = document.getElementById('focusCard');
+        card.querySelector('h3').innerHTML = `Entran en Periodo ${idx + 1}`;
+        listEl.innerHTML = '';
+        enPista.forEach(p => {
+            let li = document.createElement('li');
+            li.innerText = p.name;
+            listEl.appendChild(li);
+        });
+        document.querySelectorAll('td').forEach(td => td.classList.remove('highlight-col'));
+
+
+     // Activar edición manual después de renderizar
+setTimeout(() => activarEdicionManual(), 0);
+   
+
+
+document.querySelectorAll(`.col-${idx}`).forEach(td => td.classList.add('highlight-col'));
+        card.style.display = 'block';
+    }
+
+
+function toggleCelda(nombre, periodo) {
+    // 1. Buscar jugadora en globalPlan
+    const player = globalPlan.find(p => p.name === nombre);
+    if (!player) return;
+
+
+    // 2. Si está lesionada → NO permitir modificar ninguna parte
+    if (player.lesionada && player.lesionadaDesde != null) {
+
+
+        if (periodo < player.lesionadaDesde) {
+            alert(`${player.name} ya jugó esta parte y no se puede modificar.`);
+            return;
+        }
+
+
+        if (periodo >= player.lesionadaDesde) {
+            alert(`${player.name} está lesionada desde P${player.lesionadaDesde + 1} y no puede jugar esta parte.`);
+            return;
+        }
+    }
+
+
+    // 3. Alternar valor
+    player.plan[periodo] = (player.plan[periodo] === 'X') ? '-' : 'X';
+
+
+    // 4. Recalcular totales
+    player.jugados = player.plan.filter(x => x === 'X').length;
+
+
+    // 5. REPINTAR TODA LA TABLA (incluye fila de totales)
+    render(globalPlan);
+}
+
+
+function reajustarPlan() {
+
+
+    // 1. Reconstruir lista de jugadoras según los checkboxes actuales
+    const nombres = document.getElementById('playerList').value.split(',').map(s => s.trim());
+    let players = [];
+
+
+    nombres.forEach((n, i) => {
+        const viene = document.getElementById(`v${i}`).checked;
+        const titular = document.getElementById(`t${i}`).checked;
+        const lesionada = document.getElementById(`l${i}`).checked;
+
+
+        if (viene) {
+            players.push({
+                name: n,
+                titular: titular,
+                lesionada: lesionada,
+                lesionadaDesde: null,
+                plan: ['-', '-', '-', '-', '-', '-'],
+                jugados: 0,
+                racha: 0
+            });
+        }
+    });
+
+
+    if (players.length < 5) {
+        alert("⚠️ Error: Necesitas al menos 5 jugadoras disponibles.");
+        return;
+    }
+
+
+    // 2. Mantener información de lesiones ya existente
+    if (globalPlan && globalPlan.length > 0) {
+        players.forEach(p => {
+            const old = globalPlan.find(x => x.name === p.name);
+            if (old) {
+                p.lesionada = old.lesionada;
+                p.lesionadaDesde = old.lesionadaDesde;
+            }
+        });
+    }
+
+
+    // 3. Asignar titulares al primer periodo
+    const titulares = players.filter(p => p.titular);
+    if (titulares.length !== 5) {
+        alert("⚠️ Error: Debes tener exactamente 5 titulares.");
+        return;
+    }
+
+
+    titulares.forEach(p => {
+        p.plan[0] = 'X';
+        p.jugados = 1;
+        p.racha = 0;
+    });
+
+
+    players.filter(p => !p.titular).forEach(p => p.racha = 1);
+
+
+    // 4. Rellenar periodos 2 a 6
+    for (let i = 1; i < 6; i++) {
+
+
+        // Ordenar por jugados y racha (igual que generatePlan)
+        players.sort((a, b) => (a.jugados - b.jugados) || (b.racha - a.racha));
+
+
+        let enPista = 0;
+
+
+        // PRIMER PASO: marcar lesionadas y no disponibles
+        players.forEach(p => {
+            if (p.lesionada && p.lesionadaDesde != null && i >= p.lesionadaDesde) {
+                p.plan[i] = '-';
+                p.racha++;
+            } else {
+                p.plan[i] = null; // aún sin decidir
+            }
+        });
+
+
+        // SEGUNDO PASO: asignar jugadoras disponibles hasta llegar a 5
+        players.forEach(p => {
+            if (enPista >= 5) return;
+
+
+            if (p.plan[i] === null) {
+                p.plan[i] = 'X';
+                p.jugados++;
+                p.racha = 0;
+                enPista++;
+            }
+        });
+
+
+        // TERCER PASO: las que queden sin asignar → '-'
+        players.forEach(p => {
+            if (p.plan[i] === null) {
+                p.plan[i] = '-';
+                p.racha++;
+            }
+        });
+    }
+
+
+    globalPlan = players;
+    render(players);
+    alert("♻ Reajuste automático completado.");
+}
+
+
+function activarEdicionManual() {
+    const tabla = document.querySelector('#resultado table');
+    if (!tabla) return;
+
+
+    tabla.addEventListener('click', e => {
+        const celda = e.target;
+
+
+        // Ignorar si no es una celda de periodo
+        if (!celda.className.includes('col-')) return;
+
+
+        const fila = celda.parentElement;
+        const nombre = fila.children[0].innerText;
+
+
+        // Obtener el índice del periodo desde la clase col-X
+        const clases = celda.className.split(' ');
+        const clasePeriodo = clases.find(c => c.startsWith('col-'));
+        const periodo = parseInt(clasePeriodo.replace('col-', ''));
+
+
+        toggleCelda(nombre, periodo);
+    });
+}
+
+
+    // Fin de funciones existentes
+
+
+    actualizarDropdown();
+
+
+window.validarPlan = function validarPlan() {
+    if (!globalPlan || globalPlan.length === 0) {
+        alert("Primero genera o edita un plan.");
+        return;
+    }
+
+
+    let errores = [];
+    let avisos = [];
+
+
+    // 1. Validar 5 jugadoras por periodo
+    for (let p = 0; p < 6; p++) {
+        const enPista = globalPlan.filter(j => j.plan[p] === 'X').length;
+        if (enPista !== 5) {
+            errores.push(`Periodo ${p + 1}: hay ${enPista} jugadoras (deben ser 5).`);
+        }
+    }
+
+
+    // 2. Validar rachas y lesiones
+    globalPlan.forEach(j => {
+
+
+        // --- A) Validación de lesiones ---
+        if (j.lesionada && j.lesionadaDesde != null) {
+            for (let p = j.lesionadaDesde; p < 6; p++) {
+                if (j.plan[p] === 'X') {
+                    errores.push(`${j.name} está lesionada desde P${j.lesionadaDesde + 1} y aparece jugando en P${p + 1}.`);
+                }
+            }
+        }
+
+
+        // --- B) Validación de rachas ---
+        let rachaJuego = 0;
+        let rachaDescanso = 0;
+
+
+        j.plan.forEach((v, idx) => {
+
+
+            if (j.lesionada && j.lesionadaDesde != null && idx >= j.lesionadaDesde) {
+                v = '-';
+            }
+
+
+            if (v === 'X') {
+                rachaJuego++;
+                rachaDescanso = 0;
+            } else {
+                rachaDescanso++;
+                rachaJuego = 0;
+            }
+
+
+            if (rachaJuego === 3) {
+                avisos.push(`${j.name} juega 3 periodos seguidos (P${idx - 1}, P${idx}, P${idx + 1}).`);
+            }
+            if (rachaDescanso === 3) {
+                avisos.push(`${j.name} descansa 3 periodos seguidos (P${idx - 1}, P${idx}, P${idx + 1}).`);
+            }
+        });
+    });
+
+
+    // 3. Validar mínimo de 2 periodos jugados
+    globalPlan.forEach(j => {
+
+
+        if (j.lesionada && j.lesionadaDesde != null) {
+
+
+            const jugadosValidos = j.plan
+                .slice(0, j.lesionadaDesde)
+                .filter(v => v === 'X').length;
+
+
+            if (jugadosValidos < 2) {
+                avisos.push(`${j.name} solo juega ${jugadosValidos} periodos antes de lesionarse (mínimo recomendado: 2).`);
+            }
+
+
+        } else {
+
+
+            if (j.jugados < 2) {
+                avisos.push(`${j.name} solo juega ${j.jugados} periodos (mínimo recomendado: 2).`);
+            }
+        }
+    });
+
+
+    // 4. Mostrar resultados
+    let mensaje = "";
+
+
+    if (errores.length === 0 && avisos.length === 0) {
+        mensaje = "✔ El plan es válido. No se han encontrado problemas.";
+    } else {
+        if (errores.length > 0) {
+            mensaje += "❌ ERRORES:\n" + errores.join("\n") + "\n\n";
+        }
+        if (avisos.length > 0) {
+            mensaje += "⚠ AVISOS:\n" + avisos.join("\n");
+        }
+    }
+
+
+    alert(mensaje);
+};
+
+
+</script>
+</body>
+</html>
