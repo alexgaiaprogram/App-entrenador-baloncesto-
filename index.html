@@ -234,38 +234,6 @@
     <p style="font-size: 10px; opacity: 0.8;">(Toca para cerrar)</p>
 </div>
 
-
-<!-- MODAL PARA CREAR / EDITAR PLANTILLAS -->
-<div id="modalPlantilla" class="modal" style="display:none;">
-    <div class="modal-content">
-        <h2 id="modalTitulo"></h2>
-
-
-        <table id="tablaPlantilla" class="plantilla-table">
-            <thead>
-                <tr>
-                    <th>Nº</th>
-                    <th>Nombre</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="plantillaBody"></tbody>
-        </table>
-
-
-        <button class="btn" onclick="agregarFilaPlantilla()">➕ Añadir jugadora</button>
-
-
-        <div style="margin-top:15px;">
-            <button class="btn btn-save" onclick="guardarPlantillaModal()">💾 Guardar</button>
-            <button class="btn" style="background:#777;" onclick="cerrarModalPlantilla()">Cancelar</button>
-        </div>
-    </div>
-</div>
-
-
-
-
 <script>
     let db = JSON.parse(localStorage.getItem('coach_teams')) || {};
     let historyDB = JSON.parse(localStorage.getItem('match_history')) || {};
@@ -1143,5 +1111,33 @@ window.validarPlan = function validarPlan() {
 
 
 </script>
+<!-- MODAL PARA CREAR / EDITAR PLANTILLAS -->
+<div id="modalPlantilla" class="modal" style="display:none;">
+    <div class="modal-content">
+        <h2 id="modalTitulo"></h2>
+
+
+        <table id="tablaPlantilla" class="plantilla-table">
+            <thead>
+                <tr>
+                    <th>Nº</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="plantillaBody"></tbody>
+        </table>
+
+
+        <button class="btn" onclick="agregarFilaPlantilla()">➕ Añadir jugadora</button>
+
+
+        <div style="margin-top:15px;">
+            <button class="btn btn-save" onclick="guardarPlantillaModal()">💾 Guardar</button>
+            <button class="btn" style="background:#777;" onclick="cerrarModalPlantilla()">Cancelar</button>
+        </div>
+    </div>
+</div>
+    
 </body>
 </html>
