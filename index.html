@@ -238,6 +238,9 @@
 window.onerror = function(msg, url, line, col, error) {
     alert("⚠️ ERROR EN JS:\n" + msg + "\nLínea: " + line);
 };
+    // Asegurar que teamDB existe
+let teamDB = JSON.parse(localStorage.getItem("teamDB")) || {};
+    
     
     let db = JSON.parse(localStorage.getItem('coach_teams')) || {};
     let historyDB = JSON.parse(localStorage.getItem('match_history')) || {};
