@@ -181,114 +181,108 @@
     <ul id="focusList"></ul>
     <p style="font-size: 10px; opacity: 0.8;">(Toca para cerrar)</p>
 </div>
+
 <script>
 window.onerror = function(msg, url, line, col, error) {
     alert("⚠️ ERROR EN JS:\n" + msg + "\nLínea: " + line);
 };
-    // Asegurar que teamDB existe
+
+// Base de datos de plantillas (equipos)
 let teamDB = JSON.parse(localStorage.getItem("teamDB")) || {};
-    
-    
-    let db = JSON.parse(localStorage.getItem('coach_teams')) || {};
-    let historyDB = JSON.parse(localStorage.getItem('match_history')) || {};
-    let globalPlan = [];
 
+// Base de datos antigua (solo la usaremos si aún la necesitas para otras cosas)
+let db = JSON.parse(localStorage.getItem('coach_teams')) || {};
+let historyDB = JSON.parse(localStorage.getItem('match_history')) || {};
+let globalPlan = [];
 
-    function actualizarDropdown() {
-        // ... (resto de la función actualizarDropdown() sin cambios) ...
-        const select = document.getElementById('teamSelect');
-        select.innerHTML = '<option value="">-- Cargar Equipo --</option>';
-        Object.keys(db).forEach(name => {
-            let opt = document.createElement('option');
-            opt.value = name; opt.innerText = name;
-            select.appendChild(opt);
-        });
-        // Llamada a la nueva función para llenar el historial al cargar la app
+// Rellena el selector de equipos a partir de teamDB
+function actualizarDropdown() {
+    const select = document.getElementById('teamSelect');
+    select.innerHTML = '<option value="">-- Cargar Equipo --</option>';
+
+    Object.keys(teamDB).forEach(name => {
+        let opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = name;
+        select.appendChild(opt);
+    });
+
+    // Si usas historyDB, aquí llamas a actualizarHistorialDropdown()
+    if (typeof actualizarHistorialDropdown === "function") {
         actualizarHistorialDropdown();
     }
+}
 
-
-    function guardarPlantilla() {
-        // ... (resto de la función guardarPlantilla() sin cambios) ...
-        const name = document.getElementById('newTeamName').value.trim();
-        const players = document.getElementById('playerList').value;
-        if(!name || !players) return alert("Error: Debes poner un nombre y al menos una jugadora.");
-        db[name] = players;
-        localStorage.setItem('coach_teams', JSON.stringify(db));
-        actualizarDropdown();
+// Cargar plantilla desde teamDB al bloque de checkboxes
+function cargarPlantilla() {
+    const team = document.getElementById('teamSelect').value;
+    if (!team || !teamDB[team]) {
+        document.getElementById('selectorZona').style.display = 'none';
+        document.getElementById('checkboxes').innerHTML = "";
+        return;
     }
 
+    const plantilla = teamDB[team]; // [{numero, nombre}, ...]
 
-    function cargarPlantilla() {
-        // ... (resto de la función cargarPlantilla() sin cambios) ...
-        const team = document.getElementById('teamSelect').value;
-        if(!team) return;
-        document.getElementById('newTeamName').value = team;
-        document.getElementById('playerList').value = db[team];
-        const nombres = db[team].split(',').map(s => s.trim()).filter(s => s !== "");
-        let html = '';
-        nombres.forEach((n, i) => {
-          html += `<div class="player-item">
-    <span>${n}</span>
-    <input type="checkbox" id="v${i}" checked onclick="toggleConv(${i})">
-    <input type="checkbox" id="t${i}" class="t-cb" onclick="contar()">
-    <input type="checkbox" id="l${i}" class="l-cb" onclick="marcarLesionada(${i})" title="Lesionada">
-</div>`;
-        });
-        document.getElementById('checkboxes').innerHTML = html;
-        document.getElementById('selectorZona').style.display = 'block';
-        contar();
-    }
-    
+    let html = '';
+    plantilla.forEach((j, i) => {
+        const etiqueta = `${j.numero} ${j.nombre}`;
+        html += `
+        <div class="player-item">
+            <span>${etiqueta}</span>
+            <input type="checkbox" id="v${i}" checked onclick="toggleConv(${i})">
+            <input type="checkbox" id="t${i}" class="t-cb" onclick="contar()">
+            <input type="checkbox" id="l${i}" class="l-cb" onclick="marcarLesionada(${i})" title="Lesionada">
+        </div>`;
+    });
+
+    document.getElementById('checkboxes').innerHTML = html;
+    document.getElementById('selectorZona').style.display = 'block';
+    contar();
+}
+
+// Estado del modal
 let modoModal = ""; 
 let equipoEditando = ""; 
 let plantillaTemporal = []; 
-
 
 function abrirModalPlantilla(modo, equipo = "") {
     modoModal = modo;
     equipoEditando = equipo;
 
-
     const modal = document.getElementById("modalPlantilla");
     const titulo = document.getElementById("modalTitulo");
     const tbody = document.getElementById("plantillaBody");
 
-
     tbody.innerHTML = "";
-
 
     if (modo === "crear") {
         titulo.innerText = "Crear nueva plantilla";
         plantillaTemporal = [];
         agregarFilaPlantilla(); // primera fila vacía
-    } 
-    else if (modo === "editar") {
+    } else if (modo === "editar") {
+        if (!equipo || !teamDB[equipo]) {
+            alert("No se ha podido cargar la plantilla de ese equipo.");
+            return;
+        }
         titulo.innerText = `Editar plantilla: ${equipo}`;
         plantillaTemporal = [...teamDB[equipo]];
-
 
         plantillaTemporal.forEach(j => {
             agregarFilaPlantilla(j.numero, j.nombre);
         });
     }
 
-
     modal.style.display = "flex";
 }
-
 
 function cerrarModalPlantilla() {
     document.getElementById("modalPlantilla").style.display = "none";
 }
 
-
 function agregarFilaPlantilla(numero = "", nombre = "") {
     const tbody = document.getElementById("plantillaBody");
-
-
     const fila = document.createElement("tr");
-
 
     fila.innerHTML = `
         <td><input type="text" class="numInput" value="${numero}" maxlength="2"></td>
@@ -296,42 +290,31 @@ function agregarFilaPlantilla(numero = "", nombre = "") {
         <td><button onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
     `;
 
-
     tbody.appendChild(fila);
 }
 
-
 function guardarPlantillaModal() {
-
-
-console.log("➡ guardarPlantillaModal() llamada");
-    // resto del código…
-
+    console.log("➡ guardarPlantillaModal() llamada");
 
     const filas = document.querySelectorAll("#plantillaBody tr");
     let nuevaPlantilla = [];
 
-
     for (let f of filas) {
         const numero = f.querySelector(".numInput").value.trim();
         const nombre = f.querySelector(".nameInput").value.trim();
-
 
         if (!numero || !nombre) {
             alert("Todos los campos deben estar completos.");
             return;
         }
 
-
         if (!/^\d{2}$/.test(numero)) {
             alert("El dorsal debe tener dos dígitos (00–99).");
             return;
         }
 
-
         nuevaPlantilla.push({ numero, nombre });
     }
-
 
     // Validar dorsales duplicados
     const dorsales = nuevaPlantilla.map(j => j.numero);
@@ -340,39 +323,34 @@ console.log("➡ guardarPlantillaModal() llamada");
         return;
     }
 
-
     if (modoModal === "crear") {
         const nombreEquipo = prompt("Nombre del nuevo equipo:");
         if (!nombreEquipo) return;
 
-
         teamDB[nombreEquipo] = nuevaPlantilla;
-    } 
-    else if (modoModal === "editar") {
+    } else if (modoModal === "editar") {
         teamDB[equipoEditando] = nuevaPlantilla;
     }
 
-
     localStorage.setItem("teamDB", JSON.stringify(teamDB));
-    cargarEquiposEnSelector();
-
+    actualizarDropdown();   // antes llamabas a cargarEquiposEnSelector()
 
     cerrarModalPlantilla();
     alert("Plantilla guardada correctamente.");
 }
 
-
-    // ... (El resto de funciones toggleConv() y contar() sin cambios) ...
-
-
-    function toggleConv(i) {
-        const v = document.getElementById(`v${i}`);
-        const t = document.getElementById(`t${i}`);
-        if (!v.checked) { t.checked = false; t.disabled = true; } 
-        else { t.disabled = false; }
-        contar();
+// A partir de aquí, el resto de funciones (toggleConv, contar, marcarLesionada, etc.) siguen igual
+function toggleConv(i) {
+    const v = document.getElementById(`v${i}`);
+    const t = document.getElementById(`t${i}`);
+    if (!v.checked) { 
+        t.checked = false; 
+        t.disabled = true; 
+    } else { 
+        t.disabled = false; 
     }
-
+    contar();
+}
 
 function normalizarSiNo(resp) {
     if (!resp) return null;
@@ -381,8 +359,6 @@ function normalizarSiNo(resp) {
     if (resp === "no" || resp === "n" || resp === "0") return "no";
     return null;
 }
-
-
 function marcarLesionada(i) {
     const viene = document.getElementById(`v${i}`);
     const lesionada = document.getElementById(`l${i}`);
