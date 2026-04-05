@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,6 @@
         .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
         .header { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; gap: 10px; }
         .header h2 { color: #0d47a1; margin: 0; }
-        /* Estilo para el logo SVG */
         .logo-main { width: 45px; height: auto; fill: #1b5e20; } 
         .section { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
@@ -21,43 +20,36 @@
         .player-item span { text-align: left; padding-left: 5px; font-size: 14px; }
         .table-container { overflow-x: auto; margin-top: 20px; }
 
+        #resultado table td:first-child {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 160px;
+        }
 
-/* Columna de jugadoras */
-#resultado table td:first-child {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 160px;
-}
+        #resultado table td:last-child,
+        #resultado table th:last-child {
+            width: 35px;
+            max-width: 35px;
+            white-space: nowrap;
+        }
 
-
-/* Columna Tot */
-#resultado table td:last-child,
-#resultado table th:last-child {
-    width: 35px;
-    max-width: 35px;
-    white-space: nowrap;
-}
-
-
-/* Opcional: tabla más compacta */
-#resultado table th,
-#resultado table td {
-    padding: 4px;
-}
-
+        #resultado table th,
+        #resultado table td {
+            padding: 4px;
+        }
 
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border: 1px solid #cfd8dc; padding: 8px; text-align: center; }
         th { background: #0d47a1; color: white; cursor: pointer; }
         .juega { background: #c8e6c9 !important; font-weight: bold; color: #1b5e20; }
         .status-bar { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 10px; background: #fff; border-radius: 0 0 6px 6px; border: 1px solid #eee; border-top: none; }
-         .button-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 10px;
-}
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
         .count-ok { color: #2e7d32; }
         .count-error { color: #c62828; text-decoration: underline; }
         #focusCard { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: #0d47a1; color: white; padding: 15px; border-radius: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); z-index: 1000; text-align: center; }
@@ -66,104 +58,69 @@
         #focusCard li { background: rgba(255,255,255,0.2); padding: 8px; border-radius: 6px; font-weight: bold; }
         .highlight-col { background: #fff9c4 !important; border: 2px solid #fbc02d !important; }
         input:disabled { opacity: 0.2; }
-
-
-/* Celda donde NO puede jugar por lesión */
-.prohibido {
-    background-color: #ffb3b3 !important;
-    color: #900;
-    font-weight: bold;
-}
-
-
-.modal {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-
-.modal-content {
-    background: white;
-    padding: 20px;
-    width: 90%;
-    max-width: 500px;
-    border-radius: 10px;
-}
-
-
-.plantilla-table {
-    width: 100%;
-    margin-top: 10px;
-    border-collapse: collapse;
-}
-
-
-.plantilla-table th, .plantilla-table td {
-    border-bottom: 1px solid #ccc;
-    padding: 6px;
-    text-align: left;
-}
-
-
-.plantilla-table input {
-    width: 90%;
-    padding: 4px;
-}
-
-
+        .prohibido {
+            background-color: #ffb3b3 !important;
+            color: #900;
+            font-weight: bold;
+        }
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 10px;
+        }
+        .plantilla-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        .plantilla-table th, .plantilla-table td {
+            border-bottom: 1px solid #ccc;
+            padding: 6px;
+            text-align: left;
+        }
+        .plantilla-table input {
+            width: 90%;
+            padding: 4px;
+        }
     </style>
 </head>
 <body>
 
-
-<div id="header" style="
-    text-align:center;
-    padding:20px 0;
-    margin-bottom:20px;
-">
-    <img src="photo.jpg" alt="Logo Penya Roja" 
-         style="height:120px; margin-bottom:10px;">
-    <h1 style="
-        margin:0;
-        font-size:28px;
-        color:#0d47a1;
-        font-weight:900;
-    ">
+<div id="header" style="text-align:center; padding:20px 0; margin-bottom:20px;">
+    <img src="photo.jpg" alt="Logo Penya Roja" style="height:120px; margin-bottom:10px;">
+    <h1 style="margin:0; font-size:28px; color:#0d47a1; font-weight:900;">
         Coach App: Penya Roja
     </h1>
 </div>
 
-
-
-
 <div class="container">
-    
     <div class="section">
         <label>1. Equipo / Plantilla:</label>
         <select id="teamSelect" onchange="cargarPlantilla()"></select>
-        <input type="text" id="newTeamName" placeholder="Nombre del equipo">
-        <input type="text" id="playerList" placeholder="Lista: 4 LUCIA, 7 MARIA...">
-        <button class="btn btn-save" onclick="guardarPlantilla()">💾 Guardar Equipo</button>
-<button class="btn" onclick="abrirModalPlantilla('crear')">➕ Crear plantilla</button>
-<button class="btn" onclick="abrirModalPlantilla('editar', document.getElementById('teamSelect').value)">✏️ Modificar plantilla</button>
-    </div>
 
+        <button class="btn" onclick="abrirModalPlantilla('crear')">➕ Crear plantilla</button>
+        <button class="btn" onclick="abrirModalPlantilla('editar', document.getElementById('teamSelect').value)">✏️ Modificar plantilla</button>
+    </div>
 
     <div id="selectorZona" style="display:none;" class="section">
         <label>2. Configurar Partido:</label>
-
 
         <div style="display: flex; gap: 10px;">
             <input type="text" id="rivalName" placeholder="Nombre del Rival">
             <input type="date" id="matchDate">
         </div>
-
 
         <div class="player-header">
             <span>JUGADORA</span>
@@ -172,15 +129,12 @@
             <span>LESIONADA</span>
         </div>
 
-
         <div id="checkboxes"></div>
-
 
         <div class="status-bar">
             <span id="contJ">Conv: 0</span>
             <span id="contT">Titulares: 0/5</span>
         </div>
-
 
         <div class="button-grid">
             <button class="btn" onclick="generarPlan()">⚡ Generar Rotación</button>
@@ -189,10 +143,8 @@
             <button class="btn btn-save" style="background:#8e24aa;" onclick="reajustarPlan()">♻ Reajustar Automáticamente</button>
         </div>
 
-
         <div id="resultado" class="table-container"></div>
-    </div> <!-- ESTE CIERRE ES EL QUE FALTABA -->
-
+    </div>
 
     <div class="section">
         <label>3. Historial de Partidos:</label>
@@ -202,38 +154,33 @@
         <select id="historySelect" onchange="cargarPartidoGuardado()">
             <option value="">-- Cargar Partido Histórico --</option>
         </select>
-<!-- ⭐ NUEVO BOTÓN DE BORRADO ⭐ -->
-    <button class="btn" style="background:#d32f2f; color:white; margin-top:10px;"
-        onclick="
-            const key = document.getElementById('historySelect').value;
-            if (key) borrarPartido(key);
-        ">
-        🗑️ Borrar partido seleccionado
-    </button>
+        <button class="btn" style="background:#d32f2f; color:white; margin-top:10px;"
+            onclick="
+                const key = document.getElementById('historySelect').value;
+                if (key) borrarPartido(key);
+            ">
+            🗑️ Borrar partido seleccionado
+        </button>
     </div>
-</div> <!-- Cierra el contenedor principal -->
+</div>
 
-
-<!-- Ventana de Resumen Flotante -->
 <div id="focusCard" onclick="this.style.display='none'">
     <h3>
-        <!-- Mini Logo Integrado -->
         <svg style="width: 25px; height: auto; fill: white;" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="45" stroke="white" stroke-width="3" fill="none"/>
-    <path d="M50 30 C45 35, 40 40, 40 50 C40 60, 45 65, 50 70 
-             M50 30 C55 35, 60 40, 60 50 C60 60, 55 65, 50 70 
-             M45 45 Q50 42, 55 45 
-             M45 55 Q50 58, 55 55 
-             M48 62 L52 62 
-             M45 25 Q50 20, 55 25" 
-          stroke="white" stroke-width="2" fill="none"/>
-</svg>
+            <circle cx="50" cy="50" r="45" stroke="white" stroke-width="3" fill="none"/>
+            <path d="M50 30 C45 35, 40 40, 40 50 C40 60, 45 65, 50 70 
+                     M50 30 C55 35, 60 40, 60 50 C60 60, 55 65, 50 70 
+                     M45 45 Q50 42, 55 45 
+                     M45 55 Q50 58, 55 55 
+                     M48 62 L52 62 
+                     M45 25 Q50 20, 55 25" 
+                  stroke="white" stroke-width="2" fill="none"/>
+        </svg>
         Entran en Periodo 1
     </h3>
     <ul id="focusList"></ul>
     <p style="font-size: 10px; opacity: 0.8;">(Toca para cerrar)</p>
 </div>
-
 <script>
 window.onerror = function(msg, url, line, col, error) {
     alert("⚠️ ERROR EN JS:\n" + msg + "\nLínea: " + line);
