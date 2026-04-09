@@ -181,7 +181,654 @@
     <ul id="focusList"></ul>
     <p style="font-size: 10px; opacity: 0.8;">(Toca para cerrar)</p>
 </div>
+    
+<script>
+window.onerror = function (msg, url, line, col, error) {
+    alert("⚠️ ERROR EN JS:\n" + msg + "\nLínea: " + line);
+};
 
+// Base de datos principal
+let teamDB = JSON.parse(localStorage.getItem("teamDB")) || {};
+let historyDB = JSON.parse(localStorage.getItem("match_history")) || {};
+let globalPlan = [];
+
+// -----------------------------
+// SELECTOR DE EQUIPOS / PLANTILLA
+// -----------------------------
+function actualizarDropdown() {
+    const select = document.getElementById('teamSelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Cargar Equipo --</option>';
+
+    Object.keys(teamDB).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.innerText = name;
+        select.appendChild(opt);
+    });
+
+    if (typeof actualizarHistorialDropdown === "function") {
+        actualizarHistorialDropdown();
+    }
+}
+
+function cargarPlantilla() {
+    const team = document.getElementById('teamSelect').value;
+    const zona = document.getElementById('selectorZona');
+    const cont = document.getElementById('checkboxes');
+
+    if (!team || !teamDB[team]) {
+        if (zona) zona.style.display = 'none';
+        if (cont) cont.innerHTML = "";
+        globalPlan = [];
+        document.getElementById('resultado').innerHTML = "";
+        contar();
+        return;
+    }
+
+    const plantilla = teamDB[team]; // [{numero, nombre}, ...]
+    let html = '';
+
+    plantilla.forEach((j, i) => {
+        const etiqueta = `${j.numero} ${j.nombre}`;
+        html += `
+        <div class="player-item">
+            <span>${etiqueta}</span>
+            <input type="checkbox" id="v${i}" checked onclick="toggleConv(${i})">
+            <input type="checkbox" id="t${i}" class="t-cb" onclick="contar()">
+            <input type="checkbox" id="l${i}" class="l-cb" onclick="marcarLesionada(${i})" title="Lesionada">
+        </div>`;
+    });
+
+    cont.innerHTML = html;
+    zona.style.display = 'block';
+    globalPlan = [];
+    document.getElementById('resultado').innerHTML = "";
+    contar();
+}
+
+// -----------------------------
+// MODAL CREAR / EDITAR PLANTILLA
+// -----------------------------
+let modoModal = "";
+let equipoEditando = "";
+let plantillaTemporal = [];
+
+function abrirModalPlantilla(modo, equipo = "") {
+    modoModal = modo;
+    equipoEditando = equipo;
+
+    const modal = document.getElementById("modalPlantilla");
+    const titulo = document.getElementById("modalTitulo");
+    const tbody = document.getElementById("plantillaBody");
+
+    tbody.innerHTML = "";
+
+    if (modo === "crear") {
+        titulo.innerText = "Crear nueva plantilla";
+        plantillaTemporal = [];
+        agregarFilaPlantilla();
+    } else if (modo === "editar") {
+        if (!equipo || !teamDB[equipo]) {
+            alert("No se ha podido cargar la plantilla de ese equipo.");
+            return;
+        }
+        titulo.innerText = `Editar plantilla: ${equipo}`;
+        plantillaTemporal = [...teamDB[equipo]];
+
+        plantillaTemporal.forEach(j => {
+            agregarFilaPlantilla(j.numero, j.nombre);
+        });
+    }
+
+    modal.style.display = "flex";
+}
+
+function cerrarModalPlantilla() {
+    document.getElementById("modalPlantilla").style.display = "none";
+}
+
+function agregarFilaPlantilla(numero = "", nombre = "") {
+    const tbody = document.getElementById("plantillaBody");
+    const fila = document.createElement("tr");
+
+    fila.innerHTML = `
+        <td><input type="text" class="numInput" value="${numero}" maxlength="2"></td>
+        <td><input type="text" class="nameInput" value="${nombre}"></td>
+        <td><button onclick="this.parentNode.parentNode.remove()">🗑️</button></td>
+    `;
+
+    tbody.appendChild(fila);
+}
+
+function guardarPlantillaModal() {
+    const filas = document.querySelectorAll("#plantillaBody tr");
+    let nuevaPlantilla = [];
+
+    for (let f of filas) {
+        const numero = f.querySelector(".numInput").value.trim();
+        const nombre = f.querySelector(".nameInput").value.trim();
+
+        if (!numero || !nombre) {
+            alert("Todos los campos deben estar completos.");
+            return;
+        }
+
+        if (!/^\d{2}$/.test(numero)) {
+            alert("El dorsal debe tener dos dígitos (00–99).");
+            return;
+        }
+
+        nuevaPlantilla.push({ numero, nombre });
+    }
+
+    const dorsales = nuevaPlantilla.map(j => j.numero);
+    if (new Set(dorsales).size !== dorsales.length) {
+        alert("No puede haber dorsales duplicados.");
+        return;
+    }
+
+    if (modoModal === "crear") {
+        const nombreEquipo = prompt("Nombre del nuevo equipo:");
+        if (!nombreEquipo) return;
+        teamDB[nombreEquipo] = nuevaPlantilla;
+    } else if (modoModal === "editar") {
+        teamDB[equipoEditando] = nuevaPlantilla;
+    }
+
+    localStorage.setItem("teamDB", JSON.stringify(teamDB));
+    actualizarDropdown();
+    cerrarModalPlantilla();
+    alert("Plantilla guardada correctamente.");
+}
+
+// -----------------------------
+// CONVOCATORIA / CONTADORES
+// -----------------------------
+function toggleConv(i) {
+    const v = document.getElementById(`v${i}`);
+    const t = document.getElementById(`t${i}`);
+    if (!v.checked) {
+        t.checked = false;
+        t.disabled = true;
+    } else {
+        t.disabled = false;
+    }
+    contar();
+}
+
+function normalizarSiNo(resp) {
+    if (!resp) return null;
+    resp = resp.trim().toLowerCase();
+    if (resp === "sí" || resp === "si" || resp === "s" || resp === "1") return "si";
+    if (resp === "no" || resp === "n" || resp === "0") return "no";
+    return null;
+}
+
+// -----------------------------
+// LESIONES
+// -----------------------------
+function marcarLesionada(i) {
+    const viene = document.getElementById(`v${i}`);
+    const lesionada = document.getElementById(`l${i}`);
+
+    const team = document.getElementById('teamSelect').value;
+    if (!team || !teamDB[team]) return;
+
+    const plantilla = teamDB[team];
+    const jugadora = plantilla[i];
+    if (!jugadora) return;
+
+    const nombre = `${jugadora.numero} ${jugadora.nombre}`;
+    let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
+
+    if (lesionada.checked) {
+        let antes = prompt("¿La jugadora estaba lesionada ANTES del partido? (Sí / No)");
+        antes = antes?.toLowerCase();
+
+        if (antes === "sí" || antes === "si") {
+            viene.checked = false;
+            contar();
+
+            if (j) {
+                j.lesionada = true;
+                j.lesionadaDesde = 0;
+            }
+        } else if (antes === "no") {
+            preguntarParteLesion(i);
+        } else {
+            alert("Respuesta no válida. Escribe Sí o No.");
+            return;
+        }
+    } else {
+        if (j) {
+            j.lesionada = false;
+            j.lesionadaDesde = null;
+        }
+    }
+}
+
+function preguntarParteLesion(i) {
+    let parte = prompt("¿En qué parte se lesionó? (1 a 6)");
+    parte = parseInt(parte);
+
+    if (parte >= 1 && parte <= 6) {
+        const team = document.getElementById('teamSelect').value;
+        if (!team || !teamDB[team]) return;
+
+        const plantilla = teamDB[team];
+        const jugadora = plantilla[i];
+        if (!jugadora) return;
+
+        const nombre = `${jugadora.numero} ${jugadora.nombre}`;
+        let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
+
+        if (j) {
+            j.lesionada = true;
+            j.lesionadaDesde = parte - 1;
+
+            for (let p = j.lesionadaDesde; p < 6; p++) {
+                j.plan[p] = '-';
+            }
+
+            j.jugados = j.plan.filter(v => v === 'X').length;
+        }
+
+        let auto = normalizarSiNo(
+            prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
+        );
+
+        if (auto === "si") {
+            reajustarPlan();
+        } else {
+            alert("Puedes ajustar manualmente las partes posteriores.");
+            render(globalPlan);
+        }
+    } else {
+        alert("Parte no válida.");
+    }
+}
+
+// -----------------------------
+// CONTAR CONVOCADAS / TITULARES
+// -----------------------------
+function contar() {
+    const nJ = document.querySelectorAll('input[id^="v"]:checked').length;
+    const nT = document.querySelectorAll('.t-cb:checked').length;
+    const elJ = document.getElementById('contJ');
+    const elT = document.getElementById('contT');
+    elJ.innerText = `Conv: ${nJ}`;
+    elT.innerText = `Titulares: ${nT}/5`;
+    elJ.className = (nJ >= 5 && nJ <= 12) ? 'count-ok' : 'count-error';
+    elT.className = (nT === 5) ? 'count-ok' : 'count-error';
+}
+
+// -----------------------------
+// HISTORIAL DE PARTIDOS
+// -----------------------------
+function guardarPartido() {
+    const rival = document.getElementById('opponentName').value.trim();
+    const fecha = document.getElementById('historyDate').value;
+
+    if (!rival || !fecha || globalPlan.length === 0) {
+        return alert("Faltan datos (rival, fecha) o el plan de partido no está generado.");
+    }
+
+    const key = `${fecha} - ${rival}`;
+    historyDB[key] = globalPlan;
+    localStorage.setItem('match_history', JSON.stringify(historyDB));
+    alert(`Plan de partido contra ${rival} guardado con éxito.`);
+    actualizarHistorialDropdown();
+}
+
+function actualizarHistorialDropdown() {
+    const select = document.getElementById('historySelect');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Cargar Partido Histórico --</option>';
+    Object.keys(historyDB).sort().reverse().forEach(key => {
+        let opt = document.createElement('option');
+        opt.value = key;
+        opt.innerText = key;
+        select.appendChild(opt);
+    });
+}
+
+function cargarPartidoGuardado() {
+    const key = document.getElementById('historySelect').value;
+    if (!key) return;
+    const planGuardado = historyDB[key];
+    if (planGuardado) {
+        globalPlan = JSON.parse(JSON.stringify(planGuardado));
+        render(globalPlan);
+        alert(`Cargado partido: ${key}`);
+    }
+}
+
+function borrarPartido(key) {
+    const confirmar = confirm(`¿Quieres borrar el partido "${key}"?`);
+    if (!confirmar) return;
+
+    delete historyDB[key];
+    localStorage.setItem('match_history', JSON.stringify(historyDB));
+    actualizarHistorialDropdown();
+    alert(`Partido "${key}" borrado correctamente.`);
+}
+
+// -----------------------------
+// GUARDAR PLAN SIMPLE
+// -----------------------------
+function guardarPlan() {
+    if (!globalPlan || globalPlan.length === 0)
+        return alert("⚠️ Genera un plan primero.");
+
+    const rival = document.getElementById('rivalName').value || "Rival";
+    const fecha = document.getElementById('matchDate').value || new Date().toLocaleDateString();
+
+    const planesGuardados = JSON.parse(localStorage.getItem('misPlanes') || '[]');
+    planesGuardados.push({
+        id: Date.now(),
+        nombre: `Vs ${rival}`,
+        datos: globalPlan,
+        fecha: fecha
+    });
+
+    localStorage.setItem('misPlanes', JSON.stringify(planesGuardados));
+    alert("✅ Plan guardado.");
+
+    document.getElementById('rivalName').value = "";
+    document.getElementById('matchDate').valueAsDate = new Date();
+}
+
+// -----------------------------
+// REINICIAR CONFIGURACIÓN
+// -----------------------------
+function reiniciarConfiguracion() {
+    document.getElementById('rivalName').value = "";
+    document.getElementById('matchDate').valueAsDate = new Date();
+
+    const inputs = document.getElementById('checkboxes').querySelectorAll('input[type="checkbox"]');
+    inputs.forEach(input => {
+        if (input.id.startsWith('v')) input.checked = true;
+        if (input.id.startsWith('t')) {
+            input.checked = false;
+            input.disabled = false;
+        }
+        if (input.id.startsWith('l')) {
+            input.checked = false;
+        }
+    });
+
+    document.getElementById('resultado').innerHTML = "";
+    if (document.getElementById('focusCard'))
+        document.getElementById('focusCard').style.display = 'none';
+
+    globalPlan = [];
+    contar();
+    alert("🧹 Configuración reiniciada.");
+}
+
+// -----------------------------
+// GENERAR PLAN AUTOMÁTICO
+// -----------------------------
+function generarPlan() {
+    if (globalPlan && globalPlan.length > 0) {
+        alert(
+            "Ya existe un plan generado.\n\n" +
+            "👉 Si quieres reajustarlo, pulsa 'Reajustar automáticamente'.\n" +
+            "👉 Si quieres empezar de cero, pulsa 'Reset'."
+        );
+        return;
+    }
+
+    const team = document.getElementById('teamSelect').value;
+    if (!team || !teamDB[team]) {
+        alert("Selecciona un equipo primero.");
+        return;
+    }
+
+    const plantilla = teamDB[team];
+    let players = [];
+
+    plantilla.forEach((j, i) => {
+        const viene = document.getElementById(`v${i}`).checked;
+        const titular = document.getElementById(`t${i}`).checked;
+        const lesionada = document.getElementById(`l${i}`).checked;
+
+        if (viene) {
+            players.push({
+                name: `${j.numero} ${j.nombre}`,
+                titular: titular,
+                lesionada: lesionada,
+                lesionadaDesde: null,
+                plan: ['-', '-', '-', '-', '-', '-'],
+                jugados: 0,
+                racha: 0
+            });
+        }
+    });
+
+    if (players.length < 5) return alert("⚠️ Error: Necesitas al menos 5 jugadoras.");
+    const nTitulares = players.filter(p => p.titular).length;
+    if (nTitulares !== 5) return alert("⚠️ Error: Marca exactamente 5 titulares.");
+
+    players.forEach(p => {
+        if (p.titular) {
+            p.plan[0] = 'X';
+            p.jugados = 1;
+            p.racha = 0;
+        } else {
+            p.racha = 1;
+        }
+    });
+
+    for (let i = 1; i < 6; i++) {
+        players.sort((a, b) => (a.jugados - b.jugados) || (b.racha - a.racha));
+        players.forEach((p, idx) => {
+            if (p.lesionada && p.lesionadaDesde != null && i >= p.lesionadaDesde) {
+                p.plan[i] = '-';
+                p.racha++;
+                return;
+            }
+
+            if (idx < 5) {
+                p.plan[i] = 'X';
+                p.jugados++;
+                p.racha = 0;
+            } else {
+                p.plan[i] = '-';
+                p.racha++;
+            }
+        });
+    }
+
+    globalPlan = players;
+    render(players);
+}
+
+// -----------------------------
+// RENDER TABLA
+// -----------------------------
+function render(lista) {
+    lista.sort((a, b) => a.name.localeCompare(b.name));
+
+    let h = `<table><tr><th>Nombre</th>`;
+    for (let i = 1; i <= 6; i++) h += `<th onclick="verPeriodo(${i - 1})">P${i}</th>`;
+    h += `<th>Tot</th></tr>`;
+
+    let totalesPeriodo = [0, 0, 0, 0, 0, 0];
+
+    lista.forEach(p => {
+        let iconoLesion = "";
+        if (p.lesionada && p.lesionadaDesde != null) {
+            let parte = p.lesionadaDesde + 1;
+            iconoLesion = ` <span title="Lesionada desde P${parte}">🩹</span>`;
+        }
+
+        h += `<tr><td style="text-align:left">${p.name}${iconoLesion}</td>`;
+
+        p.plan.forEach((per, idx) => {
+            let clase = "";
+
+            if (p.lesionada && p.lesionadaDesde != null && idx >= p.lesionadaDesde) {
+                clase = "prohibido col-" + idx;
+            } else if (per === 'X') {
+                clase = "juega col-" + idx;
+                totalesPeriodo[idx]++;
+            } else {
+                clase = "col-" + idx;
+            }
+
+            h += `<td class="${clase}" onclick="toggleCelda('${p.name}', ${idx})">${per}</td>`;
+        });
+
+        h += `<td>${p.jugados}</td></tr>`;
+    });
+
+    h += `<tr style="background:#e3f2fd;"><th>Total</th>`;
+    for (let p = 0; p < 6; p++) {
+        const esOk = (totalesPeriodo[p] === 5);
+        if (esOk) {
+            h += `<th style="color:#0a7f00;background:#d7ffd9;font-weight:bold;">${totalesPeriodo[p]}</th>`;
+        } else {
+            h += `<th style="color:#b30000;background:#ffe0e0;font-weight:bold;">${totalesPeriodo[p]}</th>`;
+        }
+    }
+    h += `<th>-</th></tr>`;
+
+    document.getElementById('resultado').innerHTML = h + '</table>';
+    activarEdicionManual();
+}
+
+// -----------------------------
+// VER PERIODO (FOCUS CARD)
+// -----------------------------
+function verPeriodo(idx) {
+    const enPista = globalPlan.filter(p => p.plan[idx] === 'X');
+    const listEl = document.getElementById('focusList');
+    const card = document.getElementById('focusCard');
+    card.querySelector('h3').innerHTML = `Entran en Periodo ${idx + 1}`;
+    listEl.innerHTML = '';
+    enPista.forEach(p => {
+        let li = document.createElement('li');
+        li.innerText = p.name;
+        listEl.appendChild(li);
+    });
+    document.querySelectorAll('td').forEach(td => td.classList.remove('highlight-col'));
+    document.querySelectorAll(`.col-${idx}`).forEach(td => td.classList.add('highlight-col'));
+    card.style.display = 'block';
+}
+
+// -----------------------------
+// EDICIÓN MANUAL CELDAS
+// -----------------------------
+function toggleCelda(nombre, periodo) {
+    const player = globalPlan.find(p => p.name === nombre);
+    if (!player) return;
+
+    if (player.lesionada && player.lesionadaDesde != null) {
+        if (periodo < player.lesionadaDesde) {
+            alert(`${player.name} ya jugó esta parte y no se puede modificar.`);
+            return;
+        }
+        if (periodo >= player.lesionadaDesde) {
+            alert(`${player.name} está lesionada desde P${player.lesionadaDesde + 1} y no puede jugar esta parte.`);
+            return;
+        }
+    }
+
+    player.plan[periodo] = (player.plan[periodo] === 'X') ? '-' : 'X';
+    player.jugados = player.plan.filter(x => x === 'X').length;
+    render(globalPlan);
+}
+
+function activarEdicionManual() {
+    const tabla = document.querySelector('#resultado table');
+    if (!tabla) return;
+
+    tabla.onclick = function (e) {
+        const celda = e.target;
+        if (!celda.className.includes('col-')) return;
+
+        const fila = celda.parentElement;
+        let nombre = fila.children[0].innerText;
+        if (nombre.includes('🩹')) {
+            nombre = nombre.split('🩹')[0].trim();
+        }
+
+        const clases = celda.className.split(' ');
+        const clasePeriodo = clases.find(c => c.startsWith('col-'));
+        const periodo = parseInt(clasePeriodo.replace('col-', ''), 10);
+
+        toggleCelda(nombre, periodo);
+    };
+}
+
+// -----------------------------
+// REAJUSTAR PLAN
+// -----------------------------
+function reajustarPlan() {
+    const team = document.getElementById('teamSelect').value;
+    if (!team || !teamDB[team]) {
+        alert("Selecciona un equipo primero.");
+        return;
+    }
+
+    const plantilla = teamDB[team];
+    let players = [];
+
+    plantilla.forEach((j, i) => {
+        const viene = document.getElementById(`v${i}`).checked;
+        const titular = document.getElementById(`t${i}`).checked;
+        const lesionada = document.getElementById(`l${i}`).checked;
+
+        if (viene) {
+            players.push({
+                name: `${j.numero} ${j.nombre}`,
+                titular: titular,
+                lesionada: lesionada,
+                lesionadaDesde: null,
+                plan: ['-', '-', '-', '-', '-', '-'],
+                jugados: 0,
+                racha: 0
+            });
+        }
+    });
+
+    if (players.length < 5) {
+        alert("⚠️ Error: Necesitas al menos 5 jugadoras disponibles.");
+        return;
+    }
+
+    if (globalPlan && globalPlan.length > 0) {
+        players.forEach(p => {
+            const old = globalPlan.find(x => x.name === p.name);
+            if (old) {
+                p.lesionada = old.lesionada;
+                p.lesionadaDesde = old.lesionadaDesde;
+            }
+        });
+    }
+
+    const titulares = players.filter(p => p.titular);
+    if (titulares.length !== 5) {
+        alert("⚠️ Error: Debes tener exactamente 5 titulares.");
+        return;
+    }
+
+    titulares.forEach(p => {
+        p.plan[0] = 'X';
+        p.jugados = 1;
+        p.racha = 0;
+    });
+
+    players.filter(p => !p.titular).forEach(p => p.rac
+
+
+
+        
+    
 <script>
 window.onerror = function(msg, url, line, col, error) {
     alert("⚠️ ERROR EN JS:\n" + msg + "\nLínea: " + line);
