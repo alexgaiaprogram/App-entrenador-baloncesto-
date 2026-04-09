@@ -764,7 +764,6 @@ function activarEdicionManual() {
         toggleCelda(nombre, periodo);
     };
 }
-
 // -----------------------------
 // REAJUSTAR PLAN
 // -----------------------------
@@ -823,11 +822,167 @@ function reajustarPlan() {
         p.racha = 0;
     });
 
-    players.filter(p => !p.titular).forEach(p => p.rac
+    players.filter(p => !p.titular).forEach(p => p.racha = 1);
 
+    for (let i = 1; i < 6; i++) {
+        players.sort((a, b) => (a.jugados - b.jugados) || (b.racha - a.racha));
 
+        let enPista = 0;
 
-        
+        players.forEach(p => {
+            if (p.lesionada && p.lesionadaDesde != null && i >= p.lesionadaDesde) {
+                p.plan[i] = '-';
+                p.racha++;
+            } else {
+                p.plan[i] = null;
+            }
+        });
+
+        players.forEach(p => {
+            if (enPista >= 5) return;
+            if (p.plan[i] === null) {
+                p.plan[i] = 'X';
+                p.jugados++;
+                p.racha = 0;
+                enPista++;
+            }
+        });
+
+        players.forEach(p => {
+            if (p.plan[i] === null) {
+                p.plan[i] = '-';
+                p.racha++;
+            }
+        });
+    }
+
+    globalPlan = players;
+    render(players);
+    alert("♻ Reajuste automático completado.");
+}
+
+// -----------------------------
+// EDICIÓN MANUAL CELDAS
+// -----------------------------
+function activarEdicionManual() {
+    const tabla = document.querySelector('#resultado table');
+    if (!tabla) return;
+
+    tabla.onclick = function (e) {
+        const celda = e.target;
+        if (!celda.className.includes('col-')) return;
+
+        const fila = celda.parentElement;
+        let nombre = fila.children[0].innerText;
+
+        if (nombre.includes('🩹')) {
+            nombre = nombre.split('🩹')[0].trim();
+        }
+
+        const clases = celda.className.split(' ');
+        const clasePeriodo = clases.find(c => c.startsWith('col-'));
+        const periodo = parseInt(clasePeriodo.replace('col-', ''), 10);
+
+        toggleCelda(nombre, periodo);
+    };
+}
+
+// -----------------------------
+// VALIDAR PLAN
+// -----------------------------
+window.validarPlan = function validarPlan() {
+    if (!globalPlan || globalPlan.length === 0) {
+        alert("Primero genera o edita un plan.");
+        return;
+    }
+
+    let errores = [];
+    let avisos = [];
+
+    for (let p = 0; p < 6; p++) {
+        const enPista = globalPlan.filter(j => j.plan[p] === 'X').length;
+        if (enPista !== 5) {
+            errores.push(`Periodo ${p + 1}: hay ${enPista} jugadoras (deben ser 5).`);
+        }
+    }
+
+    globalPlan.forEach(j => {
+        if (j.lesionada && j.lesionadaDesde != null) {
+            for (let p = j.lesionadaDesde; p < 6; p++) {
+                if (j.plan[p] === 'X') {
+                    errores.push(`${j.name} está lesionada desde P${j.lesionadaDesde + 1} y aparece jugando en P${p + 1}.`);
+                }
+            }
+        }
+
+        let rachaJuego = 0;
+        let rachaDescanso = 0;
+
+        j.plan.forEach((v, idx) => {
+            if (j.lesionada && j.lesionadaDesde != null && idx >= j.lesionadaDesde) {
+                v = '-';
+            }
+
+            if (v === 'X') {
+                rachaJuego++;
+                rachaDescanso = 0;
+            } else {
+                rachaDescanso++;
+                rachaJuego = 0;
+            }
+
+            if (rachaJuego === 3) {
+                avisos.push(`${j.name} juega 3 periodos seguidos (P${idx - 1}, P${idx}, P${idx + 1}).`);
+            }
+            if (rachaDescanso === 3) {
+                avisos.push(`${j.name} descansa 3 periodos seguidos (P${idx - 1}, P${idx}, P${idx + 1}).`);
+            }
+        });
+    });
+
+    globalPlan.forEach(j => {
+        if (j.lesionada && j.lesionadaDesde != null) {
+            const jugadosValidos = j.plan
+                .slice(0, j.lesionadaDesde)
+                .filter(v => v === 'X').length;
+
+            if (jugadosValidos < 2) {
+                avisos.push(`${j.name} solo juega ${jugadosValidos} periodos antes de lesionarse (mínimo recomendado: 2).`);
+            }
+        } else {
+            if (j.jugados < 2) {
+                avisos.push(`${j.name} solo juega ${j.jugados} periodos (mínimo recomendado: 2).`);
+            }
+        }
+    });
+
+    let mensaje = "";
+
+    if (errores.length === 0 && avisos.length === 0) {
+        mensaje = "✔ El plan es válido. No se han encontrado problemas.";
+    } else {
+        if (errores.length > 0) {
+            mensaje += "❌ ERRORES:\n" + errores.join("\n") + "\n\n";
+        }
+        if (avisos.length > 0) {
+            mensaje += "⚠ AVISOS:\n" + avisos.join("\n");
+        }
+    }
+
+    alert(mensaje);
+};
+
+// -----------------------------
+// INICIALIZACIÓN
+// -----------------------------
+document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('matchDate');
+    if (dateInput) dateInput.valueAsDate = new Date();
+    actualizarDropdown();
+});
+    
+</script>
+    
     
 <script>
 window.onerror = function(msg, url, line, col, error) {
