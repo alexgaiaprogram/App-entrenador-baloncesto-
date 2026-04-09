@@ -713,6 +713,10 @@ function generarPlan() {
 // RENDER TABLA
 // -----------------------------
 function render(lista) {
+    document.getElementById('resultado').innerHTML =
+    `<div id="banner-historico" style="margin-bottom:10px;"></div>` +
+    h + '</table>';
+    
     lista.sort((a, b) => a.name.localeCompare(b.name));
 
     let h = `<table><tr><th>Nombre</th>`;
