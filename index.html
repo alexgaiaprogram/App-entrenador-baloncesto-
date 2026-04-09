@@ -371,6 +371,7 @@ function normalizarSiNo(resp) {
 // -----------------------------
 function marcarLesionada(i) {
     const viene = document.getElementById(`v${i}`);
+    const titular = document.getElementById(`t${i}`);
     const lesionada = document.getElementById(`l${i}`);
 
     const team = document.getElementById('teamSelect').value;
@@ -384,13 +385,20 @@ function marcarLesionada(i) {
     let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
 
     if (lesionada.checked) {
+
+        // 1. Desmarcar titular y viene
+        titular.checked = false;
+        viene.checked = false;
+
+        // 2. Deshabilitar ambos
+        titular.disabled = true;
+        viene.disabled = true;
+
+        // 3. Preguntar si estaba lesionada antes
         let antes = prompt("¿La jugadora estaba lesionada ANTES del partido? (Sí / No)");
         antes = antes?.toLowerCase();
 
         if (antes === "sí" || antes === "si") {
-            viene.checked = false;
-            contar();
-
             if (j) {
                 j.lesionada = true;
                 j.lesionadaDesde = 0;
@@ -401,13 +409,28 @@ function marcarLesionada(i) {
             alert("Respuesta no válida. Escribe Sí o No.");
             return;
         }
+
+        // 4. Reajustar automáticamente
+        let auto = normalizarSiNo(
+            prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
+        );
+
+        if (auto === "si") {
+            reajustarPlan();
+        }
+
     } else {
+        // Si se desmarca lesión → reactivar checkboxes
+        titular.disabled = false;
+        viene.disabled = false;
+
         if (j) {
             j.lesionada = false;
             j.lesionadaDesde = null;
         }
     }
 }
+
 
 function preguntarParteLesion(i) {
     let parte = prompt("¿En qué parte se lesionó? (1 a 6)");
