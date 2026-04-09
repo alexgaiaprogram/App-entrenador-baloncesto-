@@ -849,15 +849,19 @@ function activarEdicionManual() {
 
     tabla.onclick = function (e) {
         const celda = e.target;
+
+        // Solo celdas de periodos
         if (!celda.className.includes('col-')) return;
 
         const fila = celda.parentElement;
         let nombre = fila.children[0].innerText;
 
+        // Quitar icono de lesión si aparece
         if (nombre.includes('🩹')) {
             nombre = nombre.split('🩹')[0].trim();
         }
 
+        // Obtener periodo desde la clase col-X
         const clases = celda.className.split(' ');
         const clasePeriodo = clases.find(c => c.startsWith('col-'));
         const periodo = parseInt(clasePeriodo.replace('col-', ''), 10);
