@@ -544,13 +544,57 @@ function actualizarHistorialDropdown() {
 function cargarPartidoGuardado() {
     const key = document.getElementById('historySelect').value;
     if (!key) return;
+
     const planGuardado = historyDB[key];
     if (planGuardado) {
+        // Clonar el plan guardado
         globalPlan = JSON.parse(JSON.stringify(planGuardado));
+
+        // Asegurar que el contenedor está visible
+        const contenedor = document.getElementById('resultado');
+        contenedor.style.display = "block";
+
+        // Pintar la tabla
         render(globalPlan);
+
+        // M5 + M5.1: Banner con botón de ocultar
+        const banner = document.getElementById('banner-historico');
+        if (banner) {
+            banner.innerHTML = `
+                <div style="
+                    background:#fff3cd;
+                    border:1px solid #ffeeba;
+                    padding:8px 12px;
+                    border-radius:6px;
+                    font-size:14px;
+                    color:#856404;
+                    display:flex;
+                    align-items:center;
+                    justify-content:space-between;
+                    gap:12px;
+                ">
+                    <span>📜 <strong>Partido histórico cargado:</strong> ${key}</span>
+                    <button onclick="document.getElementById('banner-historico').innerHTML='';"
+                        style="
+                            background:none;
+                            border:none;
+                            font-size:16px;
+                            cursor:pointer;
+                            color:#856404;
+                        ">
+                        ❌
+                    </button>
+                </div>
+            `;
+        }
+
+        // Scroll hacia la tabla
+        contenedor.scrollIntoView({ behavior: 'smooth' });
+
         alert(`Cargado partido: ${key}`);
     }
 }
+
 
 function borrarPartido(key) {
     const confirmar = confirm(`¿Quieres borrar el partido "${key}"?`);
