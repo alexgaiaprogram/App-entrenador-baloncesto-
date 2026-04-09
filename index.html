@@ -94,6 +94,26 @@
             width: 90%;
             padding: 4px;
         }
+/* Alternar colores de filas */
+#resultado table tr:nth-child(even) {
+    background-color: #f7f7f7;
+}
+
+#resultado table tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Fila de totales */
+#resultado table tr.totales-row {
+    background-color: #dfe8ff !important;
+    font-weight: bold;
+}
+
+/* Hover para mejorar usabilidad */
+#resultado table td:hover {
+    background-color: #ffe9a8 !important;
+    cursor: pointer;
+}
     </style>
 </head>
 <body>
