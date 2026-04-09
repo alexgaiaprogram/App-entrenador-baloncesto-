@@ -743,27 +743,6 @@ function toggleCelda(nombre, periodo) {
     render(globalPlan);
 }
 
-function activarEdicionManual() {
-    const tabla = document.querySelector('#resultado table');
-    if (!tabla) return;
-
-    tabla.onclick = function (e) {
-        const celda = e.target;
-        if (!celda.className.includes('col-')) return;
-
-        const fila = celda.parentElement;
-        let nombre = fila.children[0].innerText;
-        if (nombre.includes('🩹')) {
-            nombre = nombre.split('🩹')[0].trim();
-        }
-
-        const clases = celda.className.split(' ');
-        const clasePeriodo = clases.find(c => c.startsWith('col-'));
-        const periodo = parseInt(clasePeriodo.replace('col-', ''), 10);
-
-        toggleCelda(nombre, periodo);
-    };
-}
 // -----------------------------
 // REAJUSTAR PLAN
 // -----------------------------
