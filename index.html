@@ -246,6 +246,8 @@ function actualizarDropdown() {
 }
 
 function cargarPlantilla() {
+    document.body.classList.remove("modo-historico");
+    
     const team = document.getElementById('teamSelect').value;
     const zona = document.getElementById('selectorZona');
     const cont = document.getElementById('checkboxes');
@@ -668,6 +670,8 @@ function borrarPartido(key) {
 // REINICIAR CONFIGURACIÓN
 // -----------------------------
 function reiniciarConfiguracion() {
+    document.body.classList.remove("modo-historico");
+
     const inputs = document.getElementById('checkboxes').querySelectorAll('input[type="checkbox"]');
     inputs.forEach(input => {
         if (input.id.startsWith('v')) input.checked = true;
@@ -693,6 +697,9 @@ function reiniciarConfiguracion() {
 // GENERAR PLAN AUTOMÁTICO
 // -----------------------------
 function generarPlan() {
+document.body.classList.remove("modo-historico");
+
+    
     if (globalPlan && globalPlan.length > 0) {
         alert(
             "Ya existe un plan generado.\n\n" +
