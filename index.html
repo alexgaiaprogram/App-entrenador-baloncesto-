@@ -117,11 +117,6 @@
     <div id="selectorZona" style="display:none;" class="section">
         <label>2. Configurar Partido:</label>
 
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="rivalName" placeholder="Nombre del Rival">
-            <input type="date" id="matchDate">
-        </div>
-
         <div class="player-header">
             <span>JUGADORA</span>
             <span>¿VIENE?</span>
@@ -545,31 +540,6 @@ function borrarPartido(key) {
     localStorage.setItem('match_history', JSON.stringify(historyDB));
     actualizarHistorialDropdown();
     alert(`Partido "${key}" borrado correctamente.`);
-}
-
-// -----------------------------
-// GUARDAR PLAN SIMPLE
-// -----------------------------
-function guardarPlan() {
-    if (!globalPlan || globalPlan.length === 0)
-        return alert("⚠️ Genera un plan primero.");
-
-    const rival = document.getElementById('rivalName').value || "Rival";
-    const fecha = document.getElementById('matchDate').value || new Date().toLocaleDateString();
-
-    const planesGuardados = JSON.parse(localStorage.getItem('misPlanes') || '[]');
-    planesGuardados.push({
-        id: Date.now(),
-        nombre: `Vs ${rival}`,
-        datos: globalPlan,
-        fecha: fecha
-    });
-
-    localStorage.setItem('misPlanes', JSON.stringify(planesGuardados));
-    alert("✅ Plan guardado.");
-
-    document.getElementById('rivalName').value = "";
-    document.getElementById('matchDate').valueAsDate = new Date();
 }
 
 // -----------------------------
