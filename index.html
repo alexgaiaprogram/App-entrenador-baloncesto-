@@ -363,57 +363,41 @@ function marcarLesionada(i) {
     const viene = document.getElementById(`v${i}`);
     const lesionada = document.getElementById(`l${i}`);
 
+    // Obtener equipo seleccionado y jugadora real desde teamDB
+    const team = document.getElementById('teamSelect').value;
+    if (!team || !teamDB[team]) return;
 
-    // Obtener nombre real de la jugadora
-    const nombres = document.getElementById('playerList').value.split(',').map(s => s.trim());
-    const nombre = nombres[i];
+    const plantilla = teamDB[team]; // [{numero, nombre}, ...]
+    const jugadora = plantilla[i];
+    if (!jugadora) return;
 
+    const nombre = `${jugadora.numero} ${jugadora.nombre}`;
 
     // Buscar jugadora en globalPlan (solo si viene)
     let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
 
-
     if (lesionada.checked) {
-
-
-        // Pregunta con Sí / No
         let antes = prompt("¿La jugadora estaba lesionada ANTES del partido? (Sí / No)");
         antes = antes?.toLowerCase();
 
-
         if (antes === "sí" || antes === "si") {
-
-
-            // Estaba lesionada antes del partido
             viene.checked = false;
             contar();
 
-
             if (j) {
                 j.lesionada = true;
-                j.lesionadaDesde = 0;   // No puede jugar ninguna parte
+                j.lesionadaDesde = 0;
             }
 
-
         } else if (antes === "no") {
-
-
-            // Lesionada DURANTE el partido
             preguntarParteLesion(i);
 
-
         } else {
-
-
             alert("Respuesta no válida. Escribe Sí o No.");
             return;
-
-
         }
 
-
     } else {
-        // Si desmarcan lesionada → limpiar datos
         if (j) {
             j.lesionada = false;
             j.lesionadaDesde = null;
@@ -421,37 +405,35 @@ function marcarLesionada(i) {
     }
 }
 
-
 function preguntarParteLesion(i) {
     let parte = prompt("¿En qué parte se lesionó? (1 a 6)");
     parte = parseInt(parte);
 
-
     if (parte >= 1 && parte <= 6) {
-        const nombres = document.getElementById('playerList').value.split(',').map(s => s.trim());
-        const nombre = nombres[i];
-        let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
+        const team = document.getElementById('teamSelect').value;
+        if (!team || !teamDB[team]) return;
 
+        const plantilla = teamDB[team];
+        const jugadora = plantilla[i];
+        if (!jugadora) return;
+
+        const nombre = `${jugadora.numero} ${jugadora.nombre}`;
+        let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
 
         if (j) {
             j.lesionada = true;
             j.lesionadaDesde = parte - 1;
 
-
-            // LIMPIAR SIEMPRE las partes posteriores
             for (let p = j.lesionadaDesde; p < 6; p++) {
                 j.plan[p] = '-';
             }
 
-
             j.jugados = j.plan.filter(v => v === 'X').length;
         }
-
 
         let auto = normalizarSiNo(
             prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
         );
-
 
         if (auto === "si") {
             reajustarPlan();
@@ -460,112 +442,95 @@ function preguntarParteLesion(i) {
             render(globalPlan);
         }
 
-
     } else {
         alert("Parte no válida.");
     }
 }
-    function contar() {
-        const nJ = document.querySelectorAll('input[id^="v"]:checked').length;
-        const nT = document.querySelectorAll('.t-cb:checked').length;
-        const elJ = document.getElementById('contJ');
-        const elT = document.getElementById('contT');
-        elJ.innerText = `Conv: ${nJ}`;
-        elT.innerText = `Titulares: ${nT}/5`;
-        elJ.className = (nJ >= 5 && nJ <= 12) ? 'count-ok' : 'count-error';
-        elT.className = (nT === 5) ? 'count-ok' : 'count-error';
+
+function contar() {
+    const nJ = document.querySelectorAll('input[id^="v"]:checked').length;
+    const nT = document.querySelectorAll('.t-cb:checked').length;
+    const elJ = document.getElementById('contJ');
+    const elT = document.getElementById('contT');
+    elJ.innerText = `Conv: ${nJ}`;
+    elT.innerText = `Titulares: ${nT}/5`;
+    elJ.className = (nJ >= 5 && nJ <= 12) ? 'count-ok' : 'count-error';
+    elT.className = (nT === 5) ? 'count-ok' : 'count-error';
+}
+
+// --- HISTORIAL ---
+function guardarPartido() {
+    const rival = document.getElementById('opponentName').value.trim();
+    const fecha = document.getElementById('historyDate').value;
+
+    if (!rival || !fecha || globalPlan.length === 0) {
+        return alert("Faltan datos (rival, fecha) o el plan de partido no está generado.");
     }
 
+    const key = `${fecha} - ${rival}`;
+    historyDB[key] = globalPlan;
+    localStorage.setItem('match_history', JSON.stringify(historyDB));
+    alert(`Plan de partido contra ${rival} guardado con éxito.`);
+    actualizarHistorialDropdown();
+}
 
-    // --- NUEVAS FUNCIONES PARA HISTORIAL ---
-    function guardarPartido() {
-        const rival = document.getElementById('opponentName').value.trim();
-        const fecha = document.getElementById('historyDate').value;
+function actualizarHistorialDropdown() {
+    const select = document.getElementById('historySelect');
+    select.innerHTML = '<option value="">-- Cargar Partido Histórico --</option>';
+    Object.keys(historyDB).sort().reverse().forEach(key => {
+        let opt = document.createElement('option');
+        opt.value = key;
+        opt.innerText = key;
+        select.appendChild(opt);
+    });
+}
 
-
-        if (!rival || !fecha || globalPlan.length === 0) {
-            return alert("Faltan datos (rival, fecha) o el plan de partido no está generado.");
-        }
-
-
-        const key = `${fecha} - ${rival}`;
-        historyDB[key] = globalPlan; // Guarda el plan completo como un objeto JSON
-        localStorage.setItem('match_history', JSON.stringify(historyDB)); // Guarda en localStorage
-        alert(`Plan de partido contra ${rival} guardado con éxito.`);
-        actualizarHistorialDropdown();
+function cargarPartidoGuardado() {
+    const key = document.getElementById('historySelect').value;
+    if (!key) return;
+    const planGuardado = historyDB[key];
+    if (planGuardado) {
+        render(planGuardado);
+        alert(`Cargado partido: ${key}`);
     }
-
-
-    function actualizarHistorialDropdown() {
-        const select = document.getElementById('historySelect');
-        select.innerHTML = '<option value="">-- Cargar Partido Histórico --</option>';
-        // Ordena las claves por fecha (clave) de forma descendente
-        Object.keys(historyDB).sort().reverse().forEach(key => {
-            let opt = document.createElement('option');
-            opt.value = key; opt.innerText = key;
-            select.appendChild(opt);
-        });
-    }
-
-
-    function cargarPartidoGuardado() {
-        const key = document.getElementById('historySelect').value;
-        if (!key) return;
-        const planGuardado = historyDB[key];
-        if (planGuardado) {
-            render(planGuardado); // Renderiza el plan histórico en la tabla
-            alert(`Cargado partido: ${key}`);
-        }
-    }
-
+}
 
 function borrarPartido(key) {
     const confirmar = confirm(`¿Quieres borrar el partido "${key}"?`);
     if (!confirmar) return;
 
-
-    delete historyDB[key]; // elimina el partido del objeto
+    delete historyDB[key];
     localStorage.setItem('match_history', JSON.stringify(historyDB));
 
-
-    actualizarHistorialDropdown(); // refresca el selector
+    actualizarHistorialDropdown();
     alert(`Partido "${key}" borrado correctamente.`);
 }
 
+function guardarPlan() {
+    if (typeof globalPlan === 'undefined' || globalPlan.length === 0)
+        return alert("⚠️ Genera un plan primero.");
+    
+    const rival = document.getElementById('rivalName').value || "Rival";
+    const fecha = document.getElementById('matchDate').value || new Date().toLocaleDateString();
+    
+    const planesGuardados = JSON.parse(localStorage.getItem('misPlanes') || '[]');
+    planesGuardados.push({
+        id: Date.now(),
+        nombre: `Vs ${rival}`,
+        datos: globalPlan,
+        fecha: fecha
+    });
 
+    localStorage.setItem('misPlanes', JSON.stringify(planesGuardados));
+    alert("✅ Plan guardado.");
 
+    document.getElementById('rivalName').value = ""; 
+    document.getElementById('matchDate').valueAsDate = new Date();
+}
 
-   // Función mejorada para guardar y limpiar campos
-    function guardarPlan() {
-        if (typeof globalPlan === 'undefined' || globalPlan.length === 0) return alert("⚠️ Genera un plan primero.");
-        
-        const rival = document.getElementById('rivalName').value || "Rival";
-        const fecha = document.getElementById('matchDate').value || new Date().toLocaleDateString();
-        
-        const planesGuardados = JSON.parse(localStorage.getItem('misPlanes') || '[]');
-        planesGuardados.push({
-            id: Date.now(),
-            nombre: `Vs ${rival}`,
-            datos: globalPlan,
-            fecha: fecha
-        });
-
-
-        localStorage.setItem('misPlanes', JSON.stringify(planesGuardados));
-        alert("✅ Plan guardado.");
-
-
-        // RESET VALORES POR DEFECTO
-        document.getElementById('rivalName').value = ""; 
-        document.getElementById('matchDate').valueAsDate = new Date(); // Fecha actual
-    }
-
-
-    // Función para reiniciar el apartado 2
-    function reiniciarConfiguracion() {
+function reiniciarConfiguracion() {
     document.getElementById('rivalName').value = "";
     document.getElementById('matchDate').valueAsDate = new Date();
-
 
     const inputs = document.getElementById('checkboxes').querySelectorAll('input[type="checkbox"]');
     inputs.forEach(input => {
@@ -575,29 +540,24 @@ function borrarPartido(key) {
             input.disabled = false;
         }
         if (input.id.startsWith('l')) {
-            input.checked = false; // limpiar LESIONADA
+            input.checked = false;
         }
     });
 
-
     document.getElementById('resultado').innerHTML = "";
-    if (document.getElementById('focusCard')) document.getElementById('focusCard').style.display = 'none';
+    if (document.getElementById('focusCard'))
+        document.getElementById('focusCard').style.display = 'none';
 
-
-    globalPlan = [];   // ← CLAVE
-
-
+    globalPlan = [];
     contar();
     alert("🧹 Configuración reiniciada.");
 }
-    // Inicializar fecha al cargar
-    document.addEventListener('DOMContentLoaded', () => {
-        const dateInput = document.getElementById('matchDate');
-        if(dateInput) dateInput.valueAsDate = new Date();
-    });
 
-
-
+document.addEventListener('DOMContentLoaded', () => {
+    const dateInput = document.getElementById('matchDate');
+    if (dateInput) dateInput.valueAsDate = new Date();
+    actualizarDropdown();
+});
 
     // --- FUNCIONES EXISTENTES (generarPlan, render, verPeriodo) ---
     function generarPlan() {
