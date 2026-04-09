@@ -546,9 +546,6 @@ function borrarPartido(key) {
 // REINICIAR CONFIGURACIÓN
 // -----------------------------
 function reiniciarConfiguracion() {
-    document.getElementById('rivalName').value = "";
-    document.getElementById('matchDate').valueAsDate = new Date();
-
     const inputs = document.getElementById('checkboxes').querySelectorAll('input[type="checkbox"]');
     inputs.forEach(input => {
         if (input.id.startsWith('v')) input.checked = true;
