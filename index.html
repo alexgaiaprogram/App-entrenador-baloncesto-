@@ -114,6 +114,20 @@
     background-color: #ffe9a8 !important;
     cursor: pointer;
 }
+/* M6: modo histórico = solo visualización */
+body.modo-historico #resultado td {
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+body.modo-historico #resultado th {
+    pointer-events: none;
+}
+
+body.modo-historico .player-item input {
+    pointer-events: none;
+    opacity: 0.6;
+}       
     </style>
 </head>
 <body>
