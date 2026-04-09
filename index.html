@@ -147,9 +147,12 @@
     </div>
 
     <div class="section">
-        <label>3. Historial de Partidos:</label>
-        <input type="text" id="opponentName" placeholder="Nombre rival (ej: CB Benicalap)">
-        <input type="date" id="historyDate">
+        <label>3. Historial de Partidos:</label> 
+<label for="opponentName" class="campo-label">Nombre del rival</label>
+<input type="text" id="opponentName" placeholder="Rival">
+
+<label for="historyDate" class="campo-label">Fecha del partido</label>
+<input type="date" id="historyDate">
         <button class="btn btn-save" onclick="guardarPartido()">💾 Guardar Plan de Partido</button>
         <select id="historySelect" onchange="cargarPartidoGuardado()">
             <option value="">-- Cargar Partido Histórico --</option>
