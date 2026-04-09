@@ -863,17 +863,27 @@ function reajustarPlan() {
 // EDICIÓN MANUAL CELDAS
 // -----------------------------
 function activarEdicionManual() {
-    const tabla = document.querySelector('#resultado table');
-    if (!tabla) return;
+    const contenedor = document.getElementById('resultado');
+    if (!contenedor) return;
 
-    tabla.onclick = function (e) {
+    // Eliminar listeners previos para evitar duplicados
+    contenedor.replaceWith(contenedor.cloneNode(true));
+
+    const nuevoContenedor = document.getElementById('resultado');
+
+    nuevoContenedor.addEventListener('click', function (e) {
         const celda = e.target;
 
         // Solo celdas de periodos
-        if (!celda.className.includes('col-')) return;
+        if (!celda.classList.contains('col-0') &&
+            !celda.classList.contains('col-1') &&
+            !celda.classList.contains('col-2') &&
+            !celda.classList.contains('col-3') &&
+            !celda.classList.contains('col-4') &&
+            !celda.classList.contains('col-5')) return;
 
         const fila = celda.parentElement;
-        let nombre = fila.children[0].innerText;
+        let nombre = fila.children[0].innerText.trim();
 
         // Quitar icono de lesión si aparece
         if (nombre.includes('🩹')) {
@@ -881,12 +891,11 @@ function activarEdicionManual() {
         }
 
         // Obtener periodo desde la clase col-X
-        const clases = celda.className.split(' ');
-        const clasePeriodo = clases.find(c => c.startsWith('col-'));
+        const clasePeriodo = [...celda.classList].find(c => c.startsWith('col-'));
         const periodo = parseInt(clasePeriodo.replace('col-', ''), 10);
 
         toggleCelda(nombre, periodo);
-    };
+    });
 }
 
 // -----------------------------
