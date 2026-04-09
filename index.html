@@ -699,8 +699,6 @@ function render(lista) {
 
     document.getElementById('resultado').innerHTML = h + '</table>';
     activarEdicionManual();
-
-    activarEdicionManual();
 }
 
 // -----------------------------
@@ -725,6 +723,7 @@ function verPeriodo(idx) {
 // -----------------------------
 // EDICIÓN MANUAL CELDAS
 // -----------------------------
+
 function toggleCelda(nombre, periodo) {
     const player = globalPlan.find(p => p.name === nombre);
     if (!player) return;
@@ -732,13 +731,11 @@ function toggleCelda(nombre, periodo) {
     // RESTRICCIONES POR LESIÓN
     if (player.lesionada && player.lesionadaDesde != null) {
 
-        // No permitir modificar partes anteriores a la lesión
         if (periodo < player.lesionadaDesde) {
             alert(`${player.name} ya jugó esta parte y no se puede modificar.`);
             return;
         }
 
-        // No permitir modificar partes posteriores a la lesión
         if (periodo >= player.lesionadaDesde) {
             alert(`${player.name} está lesionada desde P${player.lesionadaDesde + 1} y no puede jugar esta parte.`);
             return;
@@ -751,17 +748,10 @@ function toggleCelda(nombre, periodo) {
     // RECALCULAR TOTAL JUGADOS
     player.jugados = player.plan.filter(x => x === 'X').length;
 
-    // RECALCULAR TOTALES POR PERIODO
-    for (let p = 0; p < 6; p++) {
-        let total = globalPlan.filter(j => j.plan[p] === 'X').length;
-        // No hace falta guardarlo, render() lo recalcula visualmente
-    }
-
     // REPINTAR TABLA
     render(globalPlan);
 }
-
-
+    
 // -----------------------------
 // REAJUSTAR PLAN
 // -----------------------------
