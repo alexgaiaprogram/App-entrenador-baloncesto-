@@ -587,6 +587,9 @@ function cargarPartidoGuardado() {
 
     const data = historyDB[key];
     if (!data) return;
+    
+    // 🔥 ACTIVAR MODO HISTÓRICO AQUÍ
+    document.body.classList.add("modo-historico");
 
     // 1. Reconstruir plantilla en la interfaz
     const teamSelect = document.getElementById('teamSelect');
