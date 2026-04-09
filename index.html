@@ -754,14 +754,15 @@ function generarPlan() {
 // RENDER TABLA
 // -----------------------------
 function render(lista) {
-    document.getElementById('resultado').innerHTML =
-    `<div id="banner-historico" style="margin-bottom:10px;"></div>` +
-    h + '</table>';
-    
+
+    // Ordenar lista
     lista.sort((a, b) => a.name.localeCompare(b.name));
 
+    // Construcción de la tabla
     let h = `<table><tr><th>Nombre</th>`;
-    for (let i = 1; i <= 6; i++) h += `<th onclick="verPeriodo(${i - 1})">P${i}</th>`;
+    for (let i = 1; i <= 6; i++) {
+        h += `<th onclick="verPeriodo(${i - 1})">P${i}</th>`;
+    }
     h += `<th>Tot</th></tr>`;
 
     let totalesPeriodo = [0, 0, 0, 0, 0, 0];
@@ -792,7 +793,9 @@ function render(lista) {
 
         h += `<td>${p.jugados}</td></tr>`;
     });
-h += `<tr class="totales-row"><th>Total</th>`;
+
+    // Fila de totales
+    h += `<tr class="totales-row"><th>Total</th>`;
     for (let p = 0; p < 6; p++) {
         const esOk = (totalesPeriodo[p] === 5);
         if (esOk) {
@@ -803,9 +806,11 @@ h += `<tr class="totales-row"><th>Total</th>`;
     }
     h += `<th>-</th></tr>`;
 
-    document.getElementById('resultado').innerHTML = h + '</table>';
+    // 🔥 Aquí va el banner vacío + la tabla
+    document.getElementById('resultado').innerHTML =
+        `<div id="banner-historico" style="margin-bottom:10px;"></div>` +
+        h + '</table>';
 }
-
 // -----------------------------
 // VER PERIODO (FOCUS CARD)
 // -----------------------------
