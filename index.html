@@ -517,13 +517,39 @@ function guardarPartido() {
     }
 
     const key = `${fecha} - ${rival}`;
-    historyDB[key] = globalPlan;
+
+    // Obtener plantilla actual (número + nombre)
+    const team = document.getElementById('teamSelect').value;
+    const plantilla = teamDB[team] || [];
+
+    // Obtener convocadas, titulares y lesionadas
+    const convocadas = [];
+    const titulares = [];
+    const lesionadas = [];
+
+    plantilla.forEach((j, i) => {
+        if (document.getElementById(`v${i}`)?.checked) convocadas.push(j.numero);
+        if (document.getElementById(`t${i}`)?.checked) titulares.push(j.numero);
+        if (document.getElementById(`l${i}`)?.checked) lesionadas.push(j.numero);
+    });
+
+    // Guardar TODO el partido
+    historyDB[key] = {
+        rival,
+        fecha,
+        plantilla,
+        plan: globalPlan,
+        convocadas,
+        titulares,
+        lesionadas
+    };
+
     localStorage.setItem('match_history', JSON.stringify(historyDB));
     alert(`Plan de partido contra ${rival} guardado con éxito.`);
 
     // Limpiar campos tras guardar
-document.getElementById('opponentName').value = "";
-document.getElementById('historyDate').value = "";
+    document.getElementById('opponentName').value = "";
+    document.getElementById('historyDate').value = "";
 
     actualizarHistorialDropdown();
 }
