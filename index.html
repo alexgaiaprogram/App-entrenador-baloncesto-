@@ -502,6 +502,11 @@ function guardarPartido() {
     historyDB[key] = globalPlan;
     localStorage.setItem('match_history', JSON.stringify(historyDB));
     alert(`Plan de partido contra ${rival} guardado con éxito.`);
+
+    // Limpiar campos tras guardar
+document.getElementById('opponentName').value = "";
+document.getElementById('historyDate').value = "";
+
     actualizarHistorialDropdown();
 }
 
