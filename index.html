@@ -850,45 +850,6 @@ function reajustarPlan() {
 }
 
 // -----------------------------
-// EDICIÓN MANUAL CELDAS
-// -----------------------------
-function activarEdicionManual() {
-    const contenedor = document.getElementById('resultado');
-    if (!contenedor) return;
-
-    // Eliminar listeners previos para evitar duplicados
-    contenedor.replaceWith(contenedor.cloneNode(true));
-
-    const nuevoContenedor = document.getElementById('resultado');
-
-    nuevoContenedor.addEventListener('click', function (e) {
-        const celda = e.target;
-
-        // Solo celdas de periodos
-        if (!celda.classList.contains('col-0') &&
-            !celda.classList.contains('col-1') &&
-            !celda.classList.contains('col-2') &&
-            !celda.classList.contains('col-3') &&
-            !celda.classList.contains('col-4') &&
-            !celda.classList.contains('col-5')) return;
-
-        const fila = celda.parentElement;
-        let nombre = fila.children[0].innerText.trim();
-
-        // Quitar icono de lesión si aparece
-        if (nombre.includes('🩹')) {
-            nombre = nombre.split('🩹')[0].trim();
-        }
-
-        // Obtener periodo desde la clase col-X
-        const clasePeriodo = [...celda.classList].find(c => c.startsWith('col-'));
-        const periodo = parseInt(clasePeriodo.replace('col-', ''), 10);
-
-        toggleCelda(nombre, periodo);
-    });
-}
-
-// -----------------------------
 // VALIDAR PLAN
 // -----------------------------
 window.validarPlan = function validarPlan() {
