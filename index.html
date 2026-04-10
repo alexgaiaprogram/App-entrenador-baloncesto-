@@ -648,7 +648,11 @@ function cargarPartidoGuardado() {
         // 🔥 Evento seguro (sin onclick inline)
         const btnReset = document.getElementById('btnResetHistorico');
         if (btnReset) {
-            btnReset.addEventListener('click', resetCompleto);
+            btnReset.addEventListener('click', () => {
+    alert("HAS PULSADO LA X");
+    resetCompleto();
+});
+            
         }
     }
 
