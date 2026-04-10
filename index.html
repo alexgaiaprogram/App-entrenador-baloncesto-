@@ -604,13 +604,12 @@ function cargarPartidoGuardado() {
 
     let html = "";
     data.plantilla.forEach((j, i) => {
-        html += `
-        <div class="player-item">
-            <span>${j.numero} ${j.nombre}</span>
-            <input type="checkbox" id="v${i}" ${data.convocadas.includes(j.numero) ? "checked" : ""}>
-            <input type="checkbox" id="t${i}" class="t-cb" ${data.titulares.includes(j.numero) ? "checked" : ""}>
-            <input type="checkbox" id="l${i}" class="l-cb" ${data.lesionadas.includes(j.numero) ? "checked" : ""}>
-        </div>`;
+        html += `<div class="player-item">
+    <span>${j.numero} ${j.nombre}</span>
+    <input type="checkbox" id="v${i}" ${data.convocadas.includes(j.numero) ? "checked" : ""}>
+    <input type="checkbox" id="t${i}" class="t-cb" ${data.titulares.includes(j.numero) ? "checked" : ""}>
+    <input type="checkbox" id="l${i}" class="l-cb" ${data.lesionadas.includes(j.numero) ? "checked" : ""}>
+</div>`;
     });
 
     cont.innerHTML = html;
