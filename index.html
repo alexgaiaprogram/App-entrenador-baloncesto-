@@ -684,7 +684,39 @@ function reiniciarConfiguracion() {
     contar();
     alert("🧹 Configuración reiniciada.");
 }
+    
+// -----------------------------
+// RESET COMPLETO 
+// ----------------------------
+function resetCompleto() {
+    // Quitar modo histórico
+    document.body.classList.remove("modo-historico");
 
+    // Reset de selectores
+    document.getElementById('teamSelect').value = "";
+    document.getElementById('historySelect').value = "";
+    document.getElementById('opponentName').value = "";
+    document.getElementById('historyDate').value = "";
+
+    // Ocultar zona de plantilla
+    const zona = document.getElementById('selectorZona');
+    if (zona) zona.style.display = 'none';
+
+    // Vaciar checkboxes
+    const cont = document.getElementById('checkboxes');
+    if (cont) cont.innerHTML = "";
+
+    // Vaciar resultado
+    document.getElementById('resultado').innerHTML = "";
+
+    // Reset de plan
+    globalPlan = [];
+
+    // Reset de contadores
+    if (typeof contar === "function") contar();
+}
+
+    
 // -----------------------------
 // GENERAR PLAN AUTOMÁTICO
 // -----------------------------
