@@ -592,12 +592,12 @@ function cargarPartidoGuardado() {
     const data = historyDB[key];
     if (!data) return;
 
-    // 🔥 ACTIVAR MODO HISTÓRICO
+    // Activar modo histórico
     document.body.classList.add("modo-historico");
 
-    // 1. Reconstruir plantilla en la interfaz
+    // 1. Reconstruir plantilla
     const teamSelect = document.getElementById('teamSelect');
-    teamSelect.value = ""; // evitar interferencias
+    teamSelect.value = "";
 
     const cont = document.getElementById('checkboxes');
     const zona = document.getElementById('selectorZona');
@@ -624,38 +624,39 @@ function cargarPartidoGuardado() {
     contenedor.style.display = "block";
     render(globalPlan);
 
-    // 4. Banner histórico (M5 + botón ocultar)
+    // 4. Banner histórico (M6.2 con botón funcional)
     const banner = document.getElementById('banner-historico');
     if (banner) {
         banner.innerHTML = `
-            <div style="
-                background:#fff3cd;
-                border:1px solid #ffeeba;
-                padding:8px 12px;
-                border-radius:6px;
-                font-size:14px;
-                color:#856404;
-                display:flex;
-                align-items:center;
-                justify-content:space-between;
-                gap:12px;
-            ">
-                <span>📜 <strong>Partido histórico cargado:</strong> ${key}</span>
-<button onclick="resetCompleto()" style="
-        background:none;
-        border:none;
-        font-size:16px;
-        cursor:pointer;
-        color:#856404;
-">❌</button>
-  </div>
+<div style="
+    background:#fff3cd;
+    border:1px solid #ffeeba;
+    padding:8px 12px;
+    border-radius:6px;
+    font-size:14px;
+    color:#856404;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+">
+    <span>📜 <strong>Partido histórico cargado:</strong> ${key}</span>
+    <button id="btnResetHistorico" style="background:none;border:none;font-size:16px;cursor:pointer;color:#856404;">❌</button>
+</div>
         `;
+
+        // 🔥 Evento seguro (sin onclick inline)
+        const btnReset = document.getElementById('btnResetHistorico');
+        if (btnReset) {
+            btnReset.addEventListener('click', resetCompleto);
+        }
     }
-document.getElementById('historySelect').value = "";
-                                                             
+
+    // M6.1: resetear selector histórico
+    document.getElementById('historySelect').value = "";
+
     contenedor.scrollIntoView({ behavior: 'smooth' });
 }
-
 // -----------------------------
 // REINICIAR CONFIGURACIÓN
 // -----------------------------
