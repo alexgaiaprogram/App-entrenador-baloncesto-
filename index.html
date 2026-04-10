@@ -625,35 +625,19 @@ function cargarPartidoGuardado() {
     render(globalPlan);
 
     // 4. Banner histórico (M6.2 con botón funcional)
-    const banner = document.getElementById('banner-historico');
-    if (banner) {
-        banner.innerHTML = `<div style="
-    background:#fff3cd;
-    border:1px solid #ffeeba;
-    padding:8px 12px;
-    border-radius:6px;
-    font-size:14px;
-    color:#856404;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-">
-    <span>📜 <strong>Partido histórico cargado:</strong> ${key}</span>
-    <button id="btnResetHistorico" style="background:none;border:none;font-size:16px;cursor:pointer;color:#856404;">❌</button>
-</div>
-        `;
+const banner = document.getElementById('banner-historico');
+if (banner) {
+    banner.innerHTML =
+        '<div style="background:#fff3cd;border:1px solid #ffeeba;padding:8px 12px;border-radius:6px;font-size:14px;color:#856404;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+            '<span>📜 <strong>Partido histórico cargado:</strong> ' + key + '</span>' +
+            '<button id="btnResetHistorico" style="background:none;border:none;font-size:16px;cursor:pointer;color:#856404;">❌</button>' +
+        '</div>';
 
-        // 🔥 Evento seguro (sin onclick inline)
-        const btnReset = document.getElementById('btnResetHistorico');
-        if (btnReset) {
-            btnReset.addEventListener('click', () => {
-    alert("HAS PULSADO LA X");
-    resetCompleto();
-});
-            
-        }
+    const btnReset = document.getElementById('btnResetHistorico');
+    if (btnReset) {
+        btnReset.addEventListener('click', resetCompleto);
     }
+}
 
     // M6.1: resetear selector histórico
     document.getElementById('historySelect').value = "";
