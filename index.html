@@ -427,49 +427,61 @@ function marcarLesionada(i) {
     let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
 
     if (lesionada.checked) {
-
-        // 1. Desmarcar titular y viene
-        titular.checked = false;
-        viene.checked = false;
-
-        // 2. Deshabilitar ambos
-        titular.disabled = true;
-        viene.disabled = true;
-
-        // 3. Preguntar si estaba lesionada antes
+        // Preguntar si estaba lesionada ANTES del partido
         let antes = prompt("¿La jugadora estaba lesionada ANTES del partido? (Sí / No)");
-        antes = antes?.toLowerCase();
+        antes = antes?.trim().toLowerCase();
 
         if (antes === "sí" || antes === "si") {
+            // Lesión ANTES del partido → no viene y no es titular
+            viene.checked = false;
+            titular.checked = false;
+            viene.disabled = true;
+            titular.disabled = true;
+
             if (j) {
                 j.lesionada = true;
                 j.lesionadaDesde = 0;
+                j.plan = ['-','-','-','-','-','-'];
+                j.jugados = 0;
             }
-        } else if (antes === "no") {
-            preguntarParteLesion(i);
-        } else {
-            alert("Respuesta no válida. Escribe Sí o No.");
+
+            contar();
+            render(globalPlan);
             return;
         }
 
-        // 4. Reajustar automáticamente
-        let auto = normalizarSiNo(
-            prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
-        );
+        if (antes === "no") {
+            // Lesión DURANTE el partido → se mantiene titular y viene
+            preguntarParteLesion(i);
 
-        if (auto === "si") {
-            reajustarPlan();
+            // Preguntar si reajustar automáticamente
+            let auto = normalizarSiNo(
+                prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
+            );
+            if (auto === "si") {
+                reajustarPlan();
+            } else {
+                render(globalPlan);
+            }
+            return;
         }
 
+        alert("Respuesta no válida. Escribe Sí o No.");
+        lesionada.checked = false;
+        return;
+
     } else {
-        // Si se desmarca lesión → reactivar checkboxes
-        titular.disabled = false;
+        // Se desmarca lesión → reactivar checkboxes
         viene.disabled = false;
+        titular.disabled = false;
 
         if (j) {
             j.lesionada = false;
             j.lesionadaDesde = null;
         }
+
+        contar();
+        render(globalPlan);
     }
 }
 
