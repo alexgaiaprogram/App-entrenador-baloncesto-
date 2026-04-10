@@ -690,6 +690,9 @@ function resetCompleto() {
     // Quitar modo histórico
     document.body.classList.remove("modo-historico");
 
+    // Borrar banner
+    document.getElementById('banner-historico').innerHTML = "";
+
     // Reset de selectores
     document.getElementById('teamSelect').value = "";
     document.getElementById('historySelect').value = "";
@@ -704,17 +707,21 @@ function resetCompleto() {
     const cont = document.getElementById('checkboxes');
     if (cont) cont.innerHTML = "";
 
-    // Vaciar resultado
+    // Vaciar resultado (tabla)
     document.getElementById('resultado').innerHTML = "";
+
+    // Reset contadores
+    document.getElementById('contJ').innerText = "Conv: 0";
+    document.getElementById('contT').innerText = "Titulares: 0/5";
 
     // Reset de plan
     globalPlan = [];
 
-    // Reset de contadores
-    if (typeof contar === "function") contar();
+    // Si existe focusCard, ocultarlo
+    const focus = document.getElementById('focusCard');
+    if (focus) focus.style.display = 'none';
 }
 
-    
 // -----------------------------
 // GENERAR PLAN AUTOMÁTICO
 // -----------------------------
