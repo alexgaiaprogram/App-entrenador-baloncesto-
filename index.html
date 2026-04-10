@@ -411,7 +411,16 @@ function normalizarSiNo(resp) {
 // -----------------------------
 // LESIONES
 // -----------------------------
+    // Candado global para evitar doble ejecución
+let bloqueoLesion = false;
+
 function marcarLesionada(i) {
+
+    // ⛔ Evita que la función se ejecute dos veces seguidas
+    if (bloqueoLesion) return;
+    bloqueoLesion = true;
+    setTimeout(() => bloqueoLesion = false, 50);
+
     const viene = document.getElementById(`v${i}`);
     const titular = document.getElementById(`t${i}`);
     const lesionada = document.getElementById(`l${i}`);
@@ -427,11 +436,13 @@ function marcarLesionada(i) {
     let j = globalPlan ? globalPlan.find(p => p.name === nombre) : null;
 
     if (lesionada.checked) {
+
         // Preguntar si estaba lesionada ANTES del partido
         let antes = prompt("¿La jugadora estaba lesionada ANTES del partido? (Sí / No)");
         antes = antes?.trim().toLowerCase();
 
         if (antes === "sí" || antes === "si") {
+
             // Lesión ANTES del partido → no viene y no es titular
             viene.checked = false;
             titular.checked = false;
@@ -451,6 +462,7 @@ function marcarLesionada(i) {
         }
 
         if (antes === "no") {
+
             // Lesión DURANTE el partido → se mantiene titular y viene
             preguntarParteLesion(i);
 
@@ -458,11 +470,13 @@ function marcarLesionada(i) {
             let auto = normalizarSiNo(
                 prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
             );
+
             if (auto === "si") {
                 reajustarPlan();
             } else {
                 render(globalPlan);
             }
+
             return;
         }
 
@@ -471,6 +485,7 @@ function marcarLesionada(i) {
         return;
 
     } else {
+
         // Se desmarca lesión → reactivar checkboxes
         viene.disabled = false;
         titular.disabled = false;
