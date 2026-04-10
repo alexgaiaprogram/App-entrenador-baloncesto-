@@ -137,23 +137,22 @@ body.modo-historico #resultado table td:hover {
 }
         /* M11: Compactar filas de la tabla de jugadoras */
 .player-item {
-    padding: 4px 8px;          /* antes 8px → reduce altura */
-    min-height: 26px;          /* asegura compacidad */
+    padding: 3px 8px !important;   /* fuerza la reducción */
+    min-height: 24px;
 }
 
 .player-header {
-    padding: 4px 8px;          /* antes 8px → más compacto */
+    padding: 4px 8px !important;
 }
 
 .player-item span {
-    font-size: 13px;           /* antes 14px → un poco más compacto */
-    padding-left: 3px;         /* reduce aire lateral */
+    font-size: 13px;
+    padding-left: 3px;
 }
 
-/* Centrar checkboxes verticalmente */
 .player-item input[type="checkbox"] {
     margin: 0;
-    transform: translateY(1px); /* ajuste fino para alineación perfecta */
+    transform: translateY(1px);
 }
 
     </style>
