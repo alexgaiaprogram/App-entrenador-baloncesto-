@@ -604,12 +604,12 @@ function cargarPartidoGuardado() {
 
     let html = "";
     data.plantilla.forEach((j, i) => {
-        html += `<div class="player-item">
-    <span>${j.numero} ${j.nombre}</span>
-    <input type="checkbox" id="v${i}" ${data.convocadas.includes(j.numero) ? "checked" : ""}>
-    <input type="checkbox" id="t${i}" class="t-cb" ${data.titulares.includes(j.numero) ? "checked" : ""}>
-    <input type="checkbox" id="l${i}" class="l-cb" ${data.lesionadas.includes(j.numero) ? "checked" : ""}>
-</div>`;
+        html += '<div class="player-item">' +
+            '<span>' + j.numero + ' ' + j.nombre + '</span>' +
+            '<input type="checkbox" id="v' + i + '" ' + (data.convocadas.includes(j.numero) ? "checked" : "") + '>' +
+            '<input type="checkbox" id="t' + i + '" class="t-cb" ' + (data.titulares.includes(j.numero) ? "checked" : "") + '>' +
+            '<input type="checkbox" id="l' + i + '" class="l-cb" ' + (data.lesionadas.includes(j.numero) ? "checked" : "") + '>' +
+        '</div>';
     });
 
     cont.innerHTML = html;
@@ -623,26 +623,34 @@ function cargarPartidoGuardado() {
     contenedor.style.display = "block";
     render(globalPlan);
 
-    // 4. Banner histórico (M6.2 con botón funcional)
-const banner = document.getElementById('banner-historico');
-if (banner) {
-    banner.innerHTML =
-        '<div style="background:#fff3cd;border:1px solid #ffeeba;padding:8px 12px;border-radius:6px;font-size:14px;color:#856404;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
-            '<span>📜 <strong>Partido histórico cargado:</strong> ' + key + '</span>' +
-            '<button id="btnResetHistorico" style="background:none;border:none;font-size:16px;cursor:pointer;color:#856404;">❌</button>' +
-        '</div>';
+    // 4. Banner histórico (versión 100% segura)
+    const banner = document.getElementById('banner-historico');
+    banner.innerHTML = ""; // limpiar
 
-    const btnReset = document.getElementById('btnResetHistorico');
-    if (btnReset) {
-        btnReset.addEventListener('click', resetCompleto);
-    }
-}
+    const div = document.createElement("div");
+    div.style = "background:#fff3cd;border:1px solid #ffeeba;padding:8px 12px;border-radius:6px;font-size:14px;color:#856404;display:flex;align-items:center;justify-content:space-between;gap:12px;";
+
+    const texto = document.createElement("span");
+    texto.innerHTML = '📜 <strong>Partido histórico cargado:</strong> ' + key;
+
+    const btn = document.createElement("button");
+    btn.id = "btnResetHistorico";
+    btn.textContent = "❌";
+    btn.style = "background:none;border:none;font-size:16px;cursor:pointer;color:#856404;";
+
+    div.appendChild(texto);
+    div.appendChild(btn);
+    banner.appendChild(div);
+
+    // 🔥 Listener seguro (el botón YA existe)
+    btn.addEventListener("click", resetCompleto);
 
     // M6.1: resetear selector histórico
     document.getElementById('historySelect').value = "";
 
     contenedor.scrollIntoView({ behavior: 'smooth' });
 }
+
 // -----------------------------
 // REINICIAR CONFIGURACIÓN
 // -----------------------------
