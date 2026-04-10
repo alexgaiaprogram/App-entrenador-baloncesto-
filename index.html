@@ -590,8 +590,8 @@ function cargarPartidoGuardado() {
 
     const data = historyDB[key];
     if (!data) return;
-    
-    // 🔥 ACTIVAR MODO HISTÓRICO AQUÍ
+
+    // 🔥 ACTIVAR MODO HISTÓRICO
     document.body.classList.add("modo-historico");
 
     // 1. Reconstruir plantilla en la interfaz
@@ -655,16 +655,6 @@ function cargarPartidoGuardado() {
     }
 
     contenedor.scrollIntoView({ behavior: 'smooth' });
-}
-
-function borrarPartido(key) {
-    const confirmar = confirm(`¿Quieres borrar el partido "${key}"?`);
-    if (!confirmar) return;
-
-    delete historyDB[key];
-    localStorage.setItem('match_history', JSON.stringify(historyDB));
-    actualizarHistorialDropdown();
-    alert(`Partido "${key}" borrado correctamente.`);
 }
 
 // -----------------------------
