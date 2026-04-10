@@ -485,7 +485,6 @@ function marcarLesionada(i) {
     }
 }
 
-
 function preguntarParteLesion(i) {
     let parte = prompt("¿En qué parte se lesionó? (1 a 6)");
     parte = parseInt(parte);
@@ -505,22 +504,12 @@ function preguntarParteLesion(i) {
             j.lesionada = true;
             j.lesionadaDesde = parte - 1;
 
+            // Mantener partes anteriores, bloquear desde la parte de lesión
             for (let p = j.lesionadaDesde; p < 6; p++) {
                 j.plan[p] = '-';
             }
 
             j.jugados = j.plan.filter(v => v === 'X').length;
-        }
-
-        let auto = normalizarSiNo(
-            prompt("¿Quieres que se reajuste el plan automáticamente? (Sí / No / 1 / 0)")
-        );
-
-        if (auto === "si") {
-            reajustarPlan();
-        } else {
-            alert("Puedes ajustar manualmente las partes posteriores.");
-            render(globalPlan);
         }
     } else {
         alert("Parte no válida.");
