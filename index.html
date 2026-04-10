@@ -115,19 +115,20 @@
     cursor: pointer;
 }
 /* M6: modo histórico = solo visualización */
-body.modo-historico #resultado td {
+body.modo-historico #resultado {
     pointer-events: none;
     opacity: 0.85;
-}
-
-body.modo-historico #resultado th {
-    pointer-events: none;
 }
 
 body.modo-historico .player-item input {
     pointer-events: none;
     opacity: 0.6;
-}       
+}
+/* Desactivar hover en modo histórico */
+body.modo-historico #resultado table td:hover {
+    background-color: inherit !important;
+    cursor: default !important;
+}
     </style>
 </head>
 <body>
