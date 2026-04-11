@@ -356,7 +356,10 @@ function cargarPlantilla() {
     let html = '';
 
     plantilla.forEach((j, i) => {
-        const etiqueta = `${j.numero} ${j.nombre}`;
+
+        // 🔥 M15: convertir el nombre a MAYÚSCULAS aquí
+        const etiqueta = `${j.numero} ${j.nombre.toUpperCase()}`;
+
         html += `
         <div class="player-item">
             <span>${etiqueta}</span>
