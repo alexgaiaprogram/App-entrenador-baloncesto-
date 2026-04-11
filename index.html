@@ -280,12 +280,10 @@ body.modo-historico #resultado table td:hover {
         </select>
         <div id="banner-historico"></div>
         <button class="btn" style="background:#d32f2f; color:white; margin-top:10px;"
-            onclick="
-                const key = document.getElementById('historySelect').value;
-                if (key) borrarPartido(key);
-            ">
-            🗑️ Borrar partido seleccionado
-        </button>
+    onclick="borrarPartidoConSelector()">
+    🗑️ Borrar partido
+</button>
+
     </div>
 </div>
 
