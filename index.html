@@ -188,6 +188,17 @@ body.modo-historico #resultado table td:hover {
     max-width: 38px !important;
     text-align: center;
 }
+ /* Compactación real de filas del modal */
+.plantilla-table {
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;   /* elimina el aire entre filas */
+}
+
+.plantilla-table th,
+.plantilla-table td {
+    padding: 1px 6px !important;    /* 1px vertical, 6px horizontal */
+    line-height: 1 !important;      /* elimina aire interno del texto */
+}
         
     </style>
 </head>
