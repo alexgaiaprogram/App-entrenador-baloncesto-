@@ -16,24 +16,6 @@
         .btn { background: #1976d2; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; }
         .btn-save { background: #2e7d32; margin-top: 5px; }
         .player-header { display: grid; grid-template-columns: 1fr 55px 55px 75px; gap: 5px; align-items: center; padding: 8px; background: #0d47a1; color: white; border-radius: 6px 6px 0 0; font-size: 10px; font-weight: bold; text-align: center; }
-       /* ✔ Versión correcta y estable de player-item */
-        .player-item {
-    display: grid;
-    grid-template-columns: 1fr 55px 55px 75px; /* columnas originales */
-    gap: 5px;
-    align-items: center;
-    padding: 4px 8px; /* compacto pero sin romper */
-    border-bottom: 1px solid #eee;
-    background: rgba(255,255,255,0.45); /* deja ver el fondo */
-    border-radius: 6px;
-    white-space: nowrap; /* evita que los nombres se partan */
-}
-          .player-item span {
-    text-align: left;
-    padding-left: 3px;
-    font-size: 13px;
-}  
-
         .table-container { overflow-x: auto; margin-top: 20px; }
 
         #resultado table td:first-child {
@@ -244,6 +226,63 @@ body {
     white-space: nowrap;
 }
 
+
+/* ✔ Estructura correcta y estable de la tabla de checkboxes */
+.player-item {
+    display: grid;
+    grid-template-columns: 1fr 55px 55px 75px; /* columnas alineadas */
+    gap: 5px;
+    align-items: center;
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    background: rgba(255,255,255,0.45); /* deja ver el fondo */
+    border-radius: 6px;
+    white-space: nowrap; /* evita que los nombres se partan */
+}
+
+.player-item span {
+    text-align: left;
+    padding-left: 3px;
+    font-size: 14px;
+}
+
+/* ✔ Mantener encabezado alineado */
+.player-header {
+    display: grid;
+    grid-template-columns: 1fr 55px 55px 75px;
+    gap: 5px;
+    align-items: center;
+    padding: 8px;
+    background: #0d47a1;
+    color: white;
+    border-radius: 6px 6px 0 0;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* ✔ Alternancia SOLO en la tabla de checkboxes */
+#checkboxes .player-item:nth-child(odd) {
+    background-color: rgba(255,255,255,0.55) !important;
+}
+
+#checkboxes .player-item:nth-child(even) {
+    background-color: rgba(245,245,245,0.55) !important;
+}
+
+/* ✔ La tabla de planificación NO debe tener cajón */
+#resultado {
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+/* ✔ La tabla de planificación mantiene su estilo original */
+#resultado table {
+    width: 100%;
+    background: white !important;
+}
+              
     </style>
 </head>
 <body>
