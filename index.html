@@ -796,7 +796,25 @@ function cargarPartidoGuardado() {
 
     contenedor.scrollIntoView({ behavior: 'smooth' });
 }
+function borrarPartido(key) {
+    if (!key) return;
 
+    const confirmar = confirm(`¿Quieres borrar el partido "${key}"?`);
+    if (!confirmar) return;
+
+    // Eliminar del objeto en memoria
+    delete historyDB[key];
+
+    // Guardar el objeto actualizado en localStorage
+    localStorage.setItem('match_history', JSON.stringify(historyDB));
+
+    // Refrescar el selector
+    if (typeof actualizarDropdown === "function") {
+        actualizarDropdown();
+    }
+
+    alert(`Partido "${key}" borrado correctamente.`);
+                                                                                  }
 // -----------------------------
 // REINICIAR CONFIGURACIÓN
 // -----------------------------
