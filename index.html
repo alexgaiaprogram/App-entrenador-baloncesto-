@@ -689,33 +689,29 @@ function actualizarHistorialDropdown() {
         select.appendChild(opt);
     });
 }
-    
+
 function borrarPartidoConSelector() {
     const select = document.getElementById('historySelect');
 
-    // No hay partidos guardados
     if (!select || select.options.length <= 1) {
         alert('No hay partidos históricos para borrar.');
         return;
     }
 
-    // Construir lista numerada para el prompt
     let mensaje = 'Elige el número del partido que quieres borrar:\n\n';
-    const mapaIndices = {}; // índice → key real
+    const mapaIndices = {};
 
     for (let i = 1; i < select.options.length; i++) {
         const opcion = select.options[i];
-        const numero = i; // 1, 2, 3...
+        const numero = i;
         mensaje += numero + '. ' + opcion.text + '\n';
-        mapaIndices[numero] = opcion.value; // guardamos la key real
+        mapaIndices[numero] = opcion.value;
     }
 
     const entrada = prompt(mensaje);
-
-    if (!entrada) return; // cancelado
+    if (!entrada) return;
 
     const indice = parseInt(entrada, 10);
-
     if (isNaN(indice) || !mapaIndices[indice]) {
         alert('Selección no válida.');
         return;
@@ -723,14 +719,10 @@ function borrarPartidoConSelector() {
 
     const key = mapaIndices[indice];
 
-    if (confirm('¿Seguro que quieres borrar este partido?')) {
-        borrarPartido(key);   // reutilizas tu función actual
-        // Opcional: refrescar el desplegable
-        if (typeof actualizarDropdown === 'function') {
-            actualizarDropdown();
-        }
-    }
-} 
+    // 👇 ya no confirmamos aquí
+    borrarPartido(key);
+}
+
 function cargarPartidoGuardado() {
     const key = document.getElementById('historySelect').value;
     if (!key) return;
