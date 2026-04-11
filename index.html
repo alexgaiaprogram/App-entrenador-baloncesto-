@@ -168,6 +168,20 @@ body.modo-historico #resultado table td:hover {
 #checkboxes .player-item:nth-child(even) {
     background-color: #f3f3f3 !important;
 }
+/* Compactar tabla del modal (crear/editar plantilla) */
+.plantilla-table th,
+.plantilla-table td {
+    padding: 4px 6px !important;   /* antes 6px → más compacto */
+    line-height: 1.1;              /* reduce altura real */
+}
+
+/* Ajustar ancho de la columna de números */
+.plantilla-table td:first-child,
+.plantilla-table th:first-child {
+    width: 40px !important;        /* suficiente para 2 dígitos */
+    max-width: 40px !important;
+    text-align: center;
+}
     </style>
 </head>
 <body>
