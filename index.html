@@ -436,8 +436,8 @@ function guardarPlantillaModal() {
 
     for (let f of filas) {
         const numero = f.querySelector(".numInput").value.trim();
-        const nombre = f.querySelector(".nameInput").value.trim();
-
+        const nombre = f.querySelector(".nameInput").value.trim().toUpperCase();
+        
         if (!numero || !nombre) {
             alert("Todos los campos deben estar completos.");
             return;
