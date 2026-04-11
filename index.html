@@ -199,28 +199,28 @@ body.modo-historico #resultado table td:hover {
     padding: 1px 6px !important;    /* 1px vertical, 6px horizontal */
     line-height: 1 !important;      /* elimina aire interno del texto */
 }
-
 /* M14: Espaciado equilibrado de botones en el modal */
 
-/* Separación entre tabla y primer botón */
-.plantilla-table {
+/* 1. Separar la tabla del botón Añadir jugadora */
+#tablaPlantilla {
     margin-bottom: 14px !important;
 }
 
-/* Botón Añadir jugadora → cerca del botón Guardar */
-.btn-add-player {
+/* 2. Botón Añadir jugadora → cerca del botón Guardar */
+#modalPlantilla button[onclick="agregarFilaPlantilla()"] {
     margin-bottom: 6px !important;
 }
 
-/* Botón Guardar → separado del botón Cancelar */
-.btn-save-plantilla {
+/* 3. Botón Guardar → separado del botón Cancelar */
+#modalPlantilla button[onclick="guardarPlantillaModal()"] {
     margin-bottom: 14px !important;
 }
 
-/* Botón Cancelar → separación superior */
-.btn-cancel-plantilla {
+/* 4. Botón Cancelar → separación superior */
+#modalPlantilla button[onclick="cerrarModalPlantilla()"] {
     margin-top: 6px !important;
-}      
+}
+
     </style>
 </head>
 <body>
