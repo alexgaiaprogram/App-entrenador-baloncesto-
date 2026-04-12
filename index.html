@@ -1241,10 +1241,15 @@ function verPeriodo(idx) {
 // -----------------------------
 // EDICIÓN MANUAL CELDAS
 // -----------------------------
-
 function toggleCelda(nombre, periodo) {
-    const player = globalPlan.find(p => p.name === nombre);
-    if (!player) return;
+    // nombre viene en MAYÚSCULAS desde el onclick
+    const player = globalPlan.find(
+        p => p.name.toUpperCase() === nombre.toUpperCase()
+    );
+    if (!player) {
+        console.warn("No se encontró jugadora para", nombre);
+        return;
+    }
 
     // RESTRICCIONES POR LESIÓN
     if (player.lesionada && player.lesionadaDesde != null) {
