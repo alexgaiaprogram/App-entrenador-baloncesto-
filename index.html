@@ -4,277 +4,428 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach App: Penya Roja (Pro)</title>
+
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 10px; background: #eef2f7; padding-bottom: 100px; }
-        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
-        .header { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; gap: 10px; }
-        .header h2 { color: #0d47a1; margin: 0; }
-        .logo-main { width: 45px; height: auto; fill: #1b5e20; } 
-        .section { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; }
-        .btn { background: #1976d2; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-save { background: #2e7d32; margin-top: 5px; }
-        .table-container { overflow-x: auto; margin-top: 20px; }
+    body { 
+        font-family: 'Segoe UI', sans-serif; 
+        padding: 10px; 
+        background: #eef2f7; 
+        padding-bottom: 100px; 
+    }
 
-        #resultado table td:first-child {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 160px;
-        }
+    .container { 
+        background: white; 
+        padding: 15px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        max-width: 600px; 
+        margin: auto; 
+    }
 
-        #resultado table td:last-child,
-        #resultado table th:last-child {
-            width: 35px;
-            max-width: 35px;
-            white-space: nowrap;
-        }
+    .header { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        margin-bottom: 15px; 
+        gap: 10px; 
+    }
 
-        #resultado table th,
-        #resultado table td {
-            padding: 4px;
-        }
+    .header h2 { 
+        color: #0d47a1; 
+        margin: 0; 
+    }
 
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { border: 1px solid #cfd8dc; padding: 8px; text-align: center; }
-        th { background: #0d47a1; color: white; cursor: pointer; }
-        .juega { background: #c8e6c9 !important; font-weight: bold; color: #1b5e20; }
-        .status-bar { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 10px; background: #fff; border-radius: 0 0 6px 6px; border: 1px solid #eee; border-top: none; }
-        .button-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        .count-ok { color: #2e7d32; }
-        .count-error { color: #c62828; text-decoration: underline; }
-        #focusCard { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: #0d47a1; color: white; padding: 15px; border-radius: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.3); z-index: 1000; text-align: center; }
-        #focusCard h3 { margin: 0 0 5px 0; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px;}
-        #focusCard ul { list-style: none; padding: 0; margin: 10px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        #focusCard li { background: rgba(255,255,255,0.2); padding: 8px; border-radius: 6px; font-weight: bold; }
-        .highlight-col { background: #fff9c4 !important; border: 2px solid #fbc02d !important; }
-        input:disabled { opacity: 0.2; }
-        .prohibido {
-            background-color: #ffb3b3 !important;
-            color: #900;
-            font-weight: bold;
-        }
-        .modal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-        .modal-content {
-            background: white;
-            padding: 10px;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 10px;
-        }
-        .plantilla-table {
-            width: 100%;
-            margin-top: 10px;
-            border-collapse: collapse;
-        }
-        .plantilla-table th, .plantilla-table td {
-            border-bottom: 1px solid #ccc;
-            padding: 6px;
-            text-align: left;
-        }
-        .plantilla-table input {
-            width: 90%;
-            padding: 4px;
-        }
-/* Alternar colores de filas */
-#resultado table tr:nth-child(even) {
-    background-color: #f7f7f7;
-}
+    .logo-main { 
+        width: 45px; 
+        height: auto; 
+        fill: #1b5e20; 
+    } 
 
-#resultado table tr:nth-child(odd) {
-    background-color: #ffffff;
-}
+    .section { 
+        background: #f8f9fa; 
+        padding: 12px; 
+        border-radius: 8px; 
+        margin-bottom: 15px; 
+        border: 1px solid #ddd; 
+    }
 
-/* Fila de totales */
-#resultado table tr.totales-row {
-    background-color: #dfe8ff !important;
-    font-weight: bold;
-}
+    label { 
+        display: block; 
+        font-weight: bold; 
+        margin-bottom: 5px; 
+        font-size: 14px; 
+    }
 
-/* Hover para mejorar usabilidad */
-#resultado table td:hover {
-    background-color: #ffe9a8 !important;
-    cursor: pointer;
-}
-#banner-historico {
-    position: relative;
-    z-index: 99999;
-    pointer-events: auto;
-}
+    /* Campos de texto y selects, pero no checkboxes */
+    input:not([type="checkbox"]), 
+    select { 
+        width: 100%; 
+        padding: 10px; 
+        border: 1px solid #ccc; 
+        border-radius: 6px; 
+        box-sizing: border-box; 
+        margin-bottom: 10px; 
+    }
+
+    .btn { 
+        background: #1976d2; 
+        color: white; 
+        border: none; 
+        padding: 12px; 
+        width: 100%; 
+        border-radius: 6px; 
+        font-weight: bold; 
+        cursor: pointer; 
+    }
+
+    .btn-save { 
+        background: #2e7d32; 
+        margin-top: 5px; 
+    }
+
+    .table-container { 
+        overflow-x: auto; 
+        margin-top: 20px; 
+    }
+
+    /* Tabla de planificación (apartado 2) */
+    #resultado table td:first-child {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 160px;
+    }
+
+    #resultado table td:last-child,
+    #resultado table th:last-child {
+        width: 35px;
+        max-width: 35px;
+        white-space: nowrap;
+    }
+
+    #resultado table th,
+    #resultado table td {
+        padding: 4px;
+    }
+
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        font-size: 12px; 
+    }
+
+    th, td { 
+        border: 1px solid #cfd8dc; 
+        padding: 8px; 
+        text-align: center; 
+    }
+
+    th { 
+        background: #0d47a1; 
+        color: white; 
+        cursor: pointer; 
+    }
+
+    .juega { 
+        background: #c8e6c9 !important; 
+        font-weight: bold; 
+        color: #1b5e20; 
+    }
+
+    .status-bar { 
+        display: flex; 
+        justify-content: space-between; 
+        font-size: 13px; 
+        font-weight: bold; 
+        padding: 10px; 
+        background: #fff; 
+        border-radius: 0 0 6px 6px; 
+        border: 1px solid #eee; 
+        border-top: none; 
+    }
+
+    .button-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .count-ok { 
+        color: #2e7d32; 
+    }
+
+    .count-error { 
+        color: #c62828; 
+        text-decoration: underline; 
+    }
+
+    #focusCard { 
+        display: none; 
+        position: fixed; 
+        bottom: 20px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+        width: 90%; 
+        max-width: 400px; 
+        background: #0d47a1; 
+        color: white; 
+        padding: 15px; 
+        border-radius: 15px; 
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.3); 
+        z-index: 1000; 
+        text-align: center; 
+    }
+
+    #focusCard h3 { 
+        margin: 0 0 5px 0; 
+        font-size: 16px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 10px;
+    }
+
+    #focusCard ul { 
+        list-style: none; 
+        padding: 0; 
+        margin: 10px 0; 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 5px; 
+    }
+
+    #focusCard li { 
+        background: rgba(255,255,255,0.2); 
+        padding: 8px; 
+        border-radius: 6px; 
+        font-weight: bold; 
+    }
+
+    .highlight-col { 
+        background: #fff9c4 !important; 
+        border: 2px solid #fbc02d !important; 
+    }
+
+    input:disabled { 
+        opacity: 0.2; 
+    }
+
+    .prohibido {
+        background-color: #ffb3b3 !important;
+        color: #900;
+        font-weight: bold;
+    }
+
+    .modal {
+        position: fixed;
+        top: 0; 
+        left: 0;
+        width: 100%; 
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modal-content {
+        background: white;
+        padding: 10px;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 10px;
+    }
+
+    .plantilla-table {
+        width: 100%;
+        margin-top: 10px;
+        border-collapse: collapse;
+    }
+
+    .plantilla-table th, 
+    .plantilla-table td {
+        border-bottom: 1px solid #ccc;
+        padding: 6px;
+        text-align: left;
+    }
+
+    .plantilla-table input {
+        width: 90%;
+        padding: 4px;
+    }
+
+    /* Alternar colores de filas en tabla de planificación */
+    #resultado table tr:nth-child(even) {
+        background-color: #f7f7f7;
+    }
+
+    #resultado table tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    /* Fila de totales */
+    #resultado table tr.totales-row {
+        background-color: #dfe8ff !important;
+        font-weight: bold;
+    }
+
+    /* Hover para planificación */
+    #resultado table td:hover {
+        background-color: #ffe9a8 !important;
+        cursor: pointer;
+    }
+
+    #banner-historico {
+        position: relative;
+        z-index: 99999;
+        pointer-events: auto;
+    }
         
-/* M6: modo histórico = solo visualización */
-body.modo-historico #resultado {
-    pointer-events: none;
-    opacity: 0.85;
-}
+    /* M6: modo histórico = solo visualización */
+    body.modo-historico #resultado {
+        pointer-events: none;
+        opacity: 0.85;
+    }
 
-body.modo-historico .player-item input {
-    pointer-events: none;
-    opacity: 0.6;
-}
-/* Desactivar hover en modo histórico */
-body.modo-historico #resultado table td:hover {
-    background-color: inherit !important;
-    cursor: default !important;
-}
-        /* M11: Compactar filas de la tabla de jugadoras */
-.player-header {
-    padding: 4px 8px !important;
-}
+    body.modo-historico .player-item input {
+        pointer-events: none;
+        opacity: 0.6;
+    }
 
+    body.modo-historico #resultado table td:hover {
+        background-color: inherit !important;
+        cursor: default !important;
+    }
 
-/* M12: Separar botones de plantilla */
-.btn-plantilla {
-    display: block;        /* fuerza salto de línea */
-    width: 100%;           /* mantiene el estilo original */
-    margin-bottom: 10px;   /* separación clara */
-}     
-  
-        /* 🔧 M13 corrección: eliminar alternancia en la tabla del modal */
-.plantilla-table tr {
-    background-color: white !important;
-}
+    /* Ajuste ligero del header de jugadoras */
+    .player-header {
+        padding: 4px 8px !important;
+    }
 
-/* 🔧 Compactar filas del modal */
-.plantilla-table th,
-.plantilla-table td {
-    padding: 2px 6px !important;   /* antes 6px → ahora realmente compacto */
-    line-height: 1.0 !important;   /* fuerza altura mínima */
-    height: 15px !important;       /* altura real de la fila */
-}
+    .btn-plantilla {
+        display: block;
+        width: 100%;
+        margin-bottom: 10px;
+    }     
 
-/* 🔧 Ajustar ancho de la columna Nº */
-.plantilla-table td:first-child,
-.plantilla-table th:first-child {
-    width: 38px !important;
-    max-width: 38px !important;
-    text-align: center;
-}
- /* Compactación real de filas del modal */
-.plantilla-table {
-    border-collapse: collapse !important;
-    border-spacing: 0 !important;   /* elimina el aire entre filas */
-}
+    .plantilla-table tr {
+        background-color: white !important;
+    }
 
-.plantilla-table th,
-.plantilla-table td {
-    padding: 1px 6px !important;    /* 1px vertical, 6px horizontal */
-    line-height: 1 !important;      /* elimina aire interno del texto */
-}
-/* M14: Espaciado equilibrado de botones en el modal */
+    .plantilla-table th,
+    .plantilla-table td {
+        padding: 1px 6px !important;
+        line-height: 1 !important;
+        height: 15px !important;
+    }
 
-/* 1. Separar la tabla del botón Añadir jugadora */
-#tablaPlantilla {
-    margin-bottom: 3px !important;
-}
+    .plantilla-table td:first-child,
+    .plantilla-table th:first-child {
+        width: 38px !important;
+        max-width: 38px !important;
+        text-align: center;
+    }
 
-/* 2. Botón Añadir jugadora → cerca del botón Guardar */
-#modalPlantilla button[onclick="agregarFilaPlantilla()"] {
-    margin-bottom: 3px !important;
-}
+    #tablaPlantilla {
+        margin-bottom: 3px !important;
+    }
 
-/* 3. Botón Guardar → separado del botón Cancelar */
-#modalPlantilla button[onclick="guardarPlantillaModal()"] {
-    margin-bottom: 3px !important;
-}
+    #modalPlantilla button[onclick="agregarFilaPlantilla()"] {
+        margin-bottom: 3px !important;
+    }
 
-/* 4. Botón Cancelar → separación superior */
-#modalPlantilla button[onclick="cerrarModalPlantilla()"] {
-    margin-top: 3px !important;
-}
-body {
-    background-image: url("Imagen%20fondo%20app.jpg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}    
- #checkboxes, #selectorZona {
-    background: rgba(255, 255, 255, 0.45);
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}  
+    #modalPlantilla button[onclick="guardarPlantillaModal()"] {
+        margin-bottom: 3px !important;
+    }
 
-#resultado td:first-child {
-    white-space: nowrap;
-}
+    #modalPlantilla button[onclick="cerrarModalPlantilla()"] {
+        margin-top: 3px !important;
+    }
 
+    body {
+        background-image: url("Imagen%20fondo%20app.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }    
 
-/* ✔ Estructura correcta y estable de la tabla de checkboxes */
-.player-item {
-    display: grid;
-    grid-template-columns: 1fr 55px 55px 75px; /* columnas alineadas */
-    gap: 5px;
-    align-items: center;
-    padding: 6px 8px;
-    border-bottom: 1px solid #eee;
-    background: rgba(255,255,255,0.45); /* deja ver el fondo */
-    border-radius: 6px;
-    white-space: nowrap; /* evita que los nombres se partan */
-}
+    #checkboxes, 
+    #selectorZona {
+        background: rgba(255, 255, 255, 0.45);
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }  
 
-.player-item span {
-    text-align: left;
-    padding-left: 3px;
-    font-size: 14px;
-}
-.player-item input[type="checkbox"] {
-    justify-self: center;
- }
-/* ✔ Mantener encabezado alineado */
-.player-header {
-    display: grid;
-    grid-template-columns: 1fr 55px 55px 75px;
-    gap: 5px;
-    align-items: center;
-    padding: 8px;
-    background: #0d47a1;
-    color: white;
-    border-radius: 6px 6px 0 0;
-    font-size: 10px;
-    font-weight: bold;
-    text-align: center;
-}
+    #resultado td:first-child {
+        white-space: nowrap;
+    }
 
-/* ✔ Alternancia SOLO en la tabla de checkboxes */
-#checkboxes .player-item:nth-child(odd) {
-    background-color: rgba(255,255,255,0.55) !important;
-}
+    /* ✔ Estructura correcta de filas de jugadoras */
+    .player-item {
+        display: grid;
+        grid-template-columns: 1fr 55px 55px 75px;
+        gap: 5px;
+        align-items: center;
+        padding: 4px 8px;
+        border-bottom: 1px solid #eee;
+        background: #ffffff;
+        border-radius: 0;
+        white-space: nowrap;
+    }
 
-#checkboxes .player-item:nth-child(even) {
-    background-color: rgba(245,245,245,0.55) !important;
-}
+    .player-item span {
+        text-align: left;
+        padding-left: 3px;
+        font-size: 14px;
+    }
 
-/* ✔ La tabla de planificación NO debe tener cajón */
-#resultado {
-    background: transparent !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-}
+    .player-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        justify-self: center;
+        margin: 0;
+    }
 
-/* ✔ La tabla de planificación mantiene su estilo original */
-#resultado table {
-    width: 100%;
-    background: white !important;
-}
-              
-    </style>
+    /* Cabecera alineada con filas */
+    .player-header {
+        display: grid;
+        grid-template-columns: 1fr 55px 55px 75px;
+        gap: 5px;
+        align-items: center;
+        padding: 8px;
+        background: #0d47a1;
+        color: white;
+        border-radius: 6px 6px 0 0;
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    /* Alternancia SOLO en la tabla de checkboxes */
+    #checkboxes .player-item:nth-child(odd) {
+        background-color: #ffffff !important;
+    }
+
+    #checkboxes .player-item:nth-child(even) {
+        background-color: #f3f3f3 !important;
+    }
+
+    #resultado {
+        background: transparent !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    #resultado table {
+        width: 100%;
+        background: white !important;
+    }
+</style>
+
 </head>
 <body>
 
