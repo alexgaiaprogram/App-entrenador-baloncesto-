@@ -1171,8 +1171,7 @@ function render(lista) {
 
     lista.forEach(p => {
 
-        // Nombre original y nombre en mayúsculas solo para mostrar
-        const nombreOriginal = p.name;
+        // 🔥 M15: nombre en mayúsculas
         const nombreMayus = p.name.toUpperCase();
 
         let iconoLesion = "";
@@ -1181,6 +1180,7 @@ function render(lista) {
             iconoLesion = ` <span title="Lesionada desde P${parte}">🩹</span>`;
         }
 
+        // 🔥 M15 aplicado aquí
         h += `<tr><td style="text-align:left">${nombreMayus}${iconoLesion}</td>`;
 
         p.plan.forEach((per, idx) => {
@@ -1195,8 +1195,8 @@ function render(lista) {
                 clase = "col-" + idx;
             }
 
-            // 👈 Aquí pasamos el nombre ORIGINAL, no el mayúsculas
-            h += `<td class="${clase}" onclick="toggleCelda('${nombreOriginal}', ${idx})">${per}</td>`;
+            // 🔥 M15 también aquí (en el onclick)
+            h += `<td class="${clase}" onclick="toggleCelda('${nombreMayus}', ${idx})">${per}</td>`;
         });
 
         h += `<td>${p.jugados}</td></tr>`;
@@ -1217,7 +1217,7 @@ function render(lista) {
     document.getElementById('resultado').innerHTML =
         `<div id="banner-historico" style="margin-bottom:10px;"></div>` +
         h + '</table>';
-}
+    }
 
 // -----------------------------
 // VER PERIODO (FOCUS CARD)
