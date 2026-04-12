@@ -56,17 +56,18 @@
         font-size: 14px; 
     }
 
-    /* Campos de texto y selects, pero no checkboxes */
-    input:not([type="checkbox"]), 
-    select { 
-        width: 100%; 
-        padding: 10px; 
-        border: 1px solid #ccc; 
-        border-radius: 6px; 
-        box-sizing: border-box; 
-        margin-bottom: 10px; 
-    }
-
+    /* Campos de texto y selects (NO afecta a checkboxes) */
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+}
     .btn { 
         background: #1976d2; 
         color: white; 
